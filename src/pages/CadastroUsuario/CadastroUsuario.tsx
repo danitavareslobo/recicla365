@@ -12,7 +12,8 @@ import {
   Select,
   MenuItem,
   InputAdornment,
-  IconButton
+  IconButton,
+  Alert
 } from '@mui/material';
 import {
   Person,
@@ -26,14 +27,17 @@ import {
   ArrowBack,
   Nature
 } from '@mui/icons-material';
+import { useAuth } from '../../context/AuthContext';
+import type { Usuario } from '../../types';
 import './CadastroUsuario.css';
 
 const CadastroUsuario: React.FC = () => {
   const navigate = useNavigate();
+  const { cadastrarUsuario } = useAuth();
 
   const [formData, setFormData] = useState({
     nome: '',
-    sexo: '',
+    sexo: '' as 'Masculino' | 'Feminino' | 'Outro' | '',
     cpf: '',
     dataNascimento: '',
     email: '',
@@ -52,6 +56,9 @@ const CadastroUsuario: React.FC = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,26 +78,207 @@ const CadastroUsuario: React.FC = () => {
         [name]: value
       }));
     }
+    setError('');
+    setSuccess('');
   };
 
   const handleSelectChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      sexo: value
+      sexo: value as 'Masculino' | 'Feminino' | 'Outro'
     }));
+    setError('');
+    setSuccess('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const formatCpf = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCpf(e.target.value);
+    setFormData(prev => ({ ...prev, cpf: formatted }));
+    setError('');
+    setSuccess('');
+  };
+
+  const formatCep = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{3})\d+?$/, '$1');
+  };
+
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCep(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      endereco: {
+        ...prev.endereco,
+        cep: formatted
+      }
+    }));
+    setError('');
+    setSuccess('');
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.nome.trim()) {
+      setError('Nome é obrigatório');
+      return false;
+    }
+
+    if (!formData.sexo) {
+      setError('Sexo é obrigatório');
+      return false;
+    }
+
+    if (!formData.cpf) {
+      setError('CPF é obrigatório');
+      return false;
+    }
+
+    const cpfNumeros = formData.cpf.replace(/\D/g, '');
+    if (cpfNumeros.length !== 11) {
+      setError('CPF deve ter 11 dígitos');
+      return false;
+    }
+
+    if (!formData.dataNascimento) {
+      setError('Data de nascimento é obrigatória');
+      return false;
+    }
+
+    const hoje = new Date();
+    const nascimento = new Date(formData.dataNascimento);
+    const idade = hoje.getFullYear() - nascimento.getFullYear();
+    if (idade < 16) {
+      setError('Você deve ter pelo menos 16 anos');
+      return false;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email é obrigatório');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Email inválido');
+      return false;
+    }
+
+    if (!formData.senha) {
+      setError('Senha é obrigatória');
+      return false;
+    }
+
+    if (formData.senha.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres');
+      return false;
+    }
+
+    if (formData.senha !== formData.confirmarSenha) {
+      setError('As senhas não coincidem');
+      return false;
+    }
+
+    if (!formData.endereco.cep) {
+      setError('CEP é obrigatório');
+      return false;
+    }
+
+    const cepNumeros = formData.endereco.cep.replace(/\D/g, '');
+    if (cepNumeros.length !== 8) {
+      setError('CEP deve ter 8 dígitos');
+      return false;
+    }
+
+    if (!formData.endereco.logradouro.trim()) {
+      setError('Logradouro é obrigatório');
+      return false;
+    }
+
+    if (!formData.endereco.numero.trim()) {
+      setError('Número é obrigatório');
+      return false;
+    }
+
+    if (!formData.endereco.bairro.trim()) {
+      setError('Bairro é obrigatório');
+      return false;
+    }
+
+    if (!formData.endereco.cidade.trim()) {
+      setError('Cidade é obrigatória');
+      return false;
+    }
+
+    if (!formData.endereco.estado.trim()) {
+      setError('Estado é obrigatório');
+      return false;
+    }
+
+    if (formData.endereco.estado.length !== 2) {
+      setError('Estado deve ter 2 caracteres (ex: SC)');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Formulário enviado! (funcionalidade será implementada depois)');
-    console.log('Dados do formulário:', formData);
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
+    const novoUsuario = {
+      nome: formData.nome.trim(),
+      sexo: formData.sexo,
+      cpf: formData.cpf,
+      dataNascimento: formData.dataNascimento,
+      email: formData.email.trim().toLowerCase(),
+      senha: formData.senha,
+      endereco: {
+        cep: formData.endereco.cep,
+        logradouro: formData.endereco.logradouro.trim(),
+        numero: formData.endereco.numero.trim(),
+        complemento: formData.endereco.complemento.trim(),
+        bairro: formData.endereco.bairro.trim(),
+        cidade: formData.endereco.cidade.trim(),
+        estado: formData.endereco.estado.toUpperCase()
+      }
+    } as Omit<Usuario, 'id'>;
+
+    const sucesso = cadastrarUsuario(novoUsuario);
+    
+    if (sucesso) {
+      setSuccess('✅ Usuário cadastrado com sucesso! Redirecionando para o login...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } else {
+      setError('❌ CPF ou email já cadastrado. Tente com dados diferentes.');
+    }
+    
+    setLoading(false);
   };
 
   return (
     <Container component="main" maxWidth="md">
       <Box className="cadastro-container">
         <Paper elevation={8} className="cadastro-paper">
-          {/* Header */}
           <Box className="cadastro-header">
             <Button
               startIcon={<ArrowBack />}
@@ -113,6 +301,18 @@ const CadastroUsuario: React.FC = () => {
 
           <Box component="form" onSubmit={handleSubmit} className="cadastro-form">
             
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
+
             <div className="form-grid">
               
               <div className="form-row">
@@ -157,7 +357,8 @@ const CadastroUsuario: React.FC = () => {
                     label="CPF"
                     name="cpf"
                     value={formData.cpf}
-                    onChange={handleChange}
+                    onChange={handleCpfChange}
+                    inputProps={{ maxLength: 14 }}
                     placeholder="000.000.000-00"
                     InputProps={{
                       startAdornment: (
@@ -286,9 +487,10 @@ const CadastroUsuario: React.FC = () => {
                     label="CEP"
                     name="endereco.cep"
                     value={formData.endereco.cep}
-                    onChange={handleChange}
+                    onChange={handleCepChange}
+                    inputProps={{ maxLength: 9 }}
                     placeholder="00000-000"
-                    helperText="Apenas números"
+                    helperText="Formato: 00000-000"
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -300,6 +502,7 @@ const CadastroUsuario: React.FC = () => {
                 </div>
                 <div className="form-col-7">
                   <TextField
+                    required
                     fullWidth
                     label="Logradouro"
                     name="endereco.logradouro"
@@ -334,6 +537,7 @@ const CadastroUsuario: React.FC = () => {
                 </div>
                 <div className="form-col-4">
                   <TextField
+                    required
                     fullWidth
                     label="Bairro"
                     name="endereco.bairro"
@@ -344,6 +548,7 @@ const CadastroUsuario: React.FC = () => {
                 </div>
                 <div className="form-col-3">
                   <TextField
+                    required
                     fullWidth
                     label="Cidade"
                     name="endereco.cidade"
@@ -354,11 +559,13 @@ const CadastroUsuario: React.FC = () => {
                 </div>
                 <div className="form-col-1">
                   <TextField
+                    required
                     fullWidth
                     label="UF"
                     name="endereco.estado"
                     value={formData.endereco.estado}
                     onChange={handleChange}
+                    inputProps={{ maxLength: 2 }}
                     placeholder="SC"
                   />
                 </div>
@@ -370,10 +577,11 @@ const CadastroUsuario: React.FC = () => {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={loading}
               className="cadastro-button"
               sx={{ mt: 3, mb: 2 }}
             >
-              Criar Conta
+              {loading ? 'Cadastrando...' : 'Criar Conta'}
             </Button>
 
             <Box className="form-info">
