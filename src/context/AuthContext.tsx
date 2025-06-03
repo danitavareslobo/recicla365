@@ -5,6 +5,7 @@ interface AuthContextType {
   usuario: Usuario | null;
   login: (dados: LoginData) => boolean;
   logout: () => void;
+  cadastrarUsuario: (usuario: Omit<Usuario, 'id'>) => boolean;
   isAuthenticated: boolean;
 }
 
@@ -150,10 +151,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     carregarUsuarios();
   }, []);
 
+  const cadastrarUsuario = (novoUsuario: Omit<Usuario, 'id'>): boolean => {
+  const usuarios = carregarUsuarios();
+  
+  if (usuarios.find(u => u.cpf === novoUsuario.cpf)) {
+    return false;
+  }
+
+  if (usuarios.find(u => u.email === novoUsuario.email)) {
+    return false;
+  }
+
+  const usuarioComId: Usuario = {
+    ...novoUsuario,
+    id: Date.now().toString()
+  };
+
+  usuarios.push(usuarioComId);
+  localStorage.setItem('usuarios', JSON.stringify(usuarios));
+  return true;
+};
+
   const contextValue: AuthContextType = {
     usuario,
     login,
     logout,
+    cadastrarUsuario,
     isAuthenticated: !!usuario
   };
 
