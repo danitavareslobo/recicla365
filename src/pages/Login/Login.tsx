@@ -66,7 +66,7 @@ const Login: React.FC = () => {
   };
 
   const handleCadastroClick = () => {
-    alert('Funcionalidade de cadastro será implementada na próxima etapa!');
+    navigate('/cadastro-usuario');
   };
 
   return (
