@@ -3,13 +3,14 @@
   width: 100vw;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; 
   align-items: center;
   padding: 2rem 1rem;
   background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 50%, #e1f5e1 100%);
   position: fixed;
   top: 0;
   left: 0;
+  overflow-y: auto; 
 }
 
 .cadastro-paper {
@@ -17,13 +18,11 @@
   border-radius: 16px !important;
   box-shadow: 0 8px 32px rgba(46, 125, 50, 0.15) !important;
   width: 100%;
-  max-width: 800px;
+  max-width: 900px; 
   background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(46, 125, 50, 0.1);
-  margin: auto;
-  max-height: 90vh;
-  overflow-y: auto;
+  margin: 1rem auto;   
 }
 
 .cadastro-header {
@@ -76,13 +75,13 @@
 .form-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem; 
 }
 
 .form-row {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
+  gap: 1.2rem; 
   align-items: start;
 }
 
@@ -93,6 +92,7 @@
 .form-col-6 { grid-column: span 6; }
 .form-col-7 { grid-column: span 7; }
 .form-col-8 { grid-column: span 8; }
+.form-col-9 { grid-column: span 9; } 
 .form-col-12 { grid-column: span 12; }
 
 .endereco-section {
@@ -121,7 +121,8 @@
 }
 
 .form-info {
-  margin-top: 1rem;
+  margin-top: 1.5rem; 
+  margin-bottom: 1rem; 
   padding: 1rem;
   background-color: rgba(232, 245, 232, 0.6);
   border-radius: 8px;
@@ -157,35 +158,16 @@
   color: #2e7d32 !important;
 }
 
-.cadastro-paper::-webkit-scrollbar {
-  width: 6px;
-}
-
-.cadastro-paper::-webkit-scrollbar-track {
-  background: rgba(232, 245, 232, 0.3);
-  border-radius: 3px;
-}
-
-.cadastro-paper::-webkit-scrollbar-thumb {
-  background: rgba(46, 125, 50, 0.3);
-  border-radius: 3px;
-}
-
-.cadastro-paper::-webkit-scrollbar-thumb:hover {
-  background: rgba(46, 125, 50, 0.5);
-}
-
 @media (max-width: 768px) {
   .cadastro-container {
     padding: 1rem;
-    position: fixed;
+    justify-content: flex-start; 
   }
   
   .cadastro-paper {
     padding: 1.5rem;
-    margin: 0;
+    margin: 0.5rem auto;
     max-width: calc(100vw - 2rem);
-    max-height: 95vh;
   }
   
   .cadastro-header {
@@ -200,6 +182,7 @@
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .form-col-1,
@@ -209,6 +192,7 @@
   .form-col-6,
   .form-col-7,
   .form-col-8,
+  .form-col-9,
   .form-col-12 {
     grid-column: span 1;
   }
@@ -288,5 +272,46 @@
   100% {
     background-color: rgba(76, 175, 80, 0.1);
     transform: scale(1);
+  }
+}
+
+.primeira-linha {
+  display: flex !important;
+  gap: 1.2rem !important;
+  align-items: flex-start !important; 
+  width: 100% !important;
+}
+
+.primeira-linha > :first-child {
+  flex: 3; 
+  min-width: 0; 
+}
+
+.primeira-linha > :last-child {
+  flex: 1; 
+  min-width: 150px; 
+  max-width: 200px; 
+}
+
+.primeira-linha .MuiTextField-root,
+.primeira-linha .MuiFormControl-root {
+  margin: 0.5rem 0 !important;
+}
+
+.primeira-linha .MuiOutlinedInput-root,
+.primeira-linha .MuiSelect-select {
+  height: 56px !important;
+}
+
+@media (max-width: 768px) {
+  .primeira-linha {
+    flex-direction: column !important;
+  }
+  
+  .primeira-linha > :first-child,
+  .primeira-linha > :last-child {
+    flex: 1 !important;
+    min-width: unset !important;
+    max-width: unset !important;
   }
 }

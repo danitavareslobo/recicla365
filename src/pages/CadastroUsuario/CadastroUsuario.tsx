@@ -383,41 +383,35 @@ const CadastroUsuario: React.FC = () => {
             )}
 
             <div className="form-grid">
-              
-              <div className="form-row">
-                <div className="form-col-8">
-                  <TextField
-                    required
-                    fullWidth
-                    label="Nome completo"
-                    name="nome"
-                    value={formData.nome}
-                    onChange={handleChange}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Person />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </div>
-                <div className="form-col-4">
-                  <FormControl fullWidth required>
-                    <InputLabel>Sexo</InputLabel>
-                    <Select
-                      value={formData.sexo}
-                      label="Sexo"
-                      onChange={(e) => handleSelectChange(e.target.value)}
-                    >
-                      <MenuItem value="Masculino">Masculino</MenuItem>
-                      <MenuItem value="Feminino">Feminino</MenuItem>
-                      <MenuItem value="Outro">Outro</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
+              <div className="primeira-linha">
+                <TextField
+                  required
+                  fullWidth
+                  label="Nome completo"
+                  name="nome"
+                  value={formData.nome}
+                  onChange={handleChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl fullWidth required>
+                  <InputLabel>Sexo</InputLabel>
+                  <Select
+                    value={formData.sexo}
+                    label="Sexo"
+                    onChange={(e) => handleSelectChange(e.target.value)}
+                  >
+                    <MenuItem value="Masculino">Masculino</MenuItem>
+                    <MenuItem value="Feminino">Feminino</MenuItem>
+                    <MenuItem value="Outro">Outro</MenuItem>
+                  </Select>
+                </FormControl>
               </div>
-
               <div className="form-row">
                 <div className="form-col-6">
                   <TextField
@@ -458,7 +452,6 @@ const CadastroUsuario: React.FC = () => {
                   />
                 </div>
               </div>
-
               <div className="form-row">
                 <div className="form-col-12">
                   <TextField
@@ -480,7 +473,6 @@ const CadastroUsuario: React.FC = () => {
                   />
                 </div>
               </div>
-
               <div className="form-row">
                 <div className="form-col-6">
                   <TextField
@@ -606,9 +598,8 @@ const CadastroUsuario: React.FC = () => {
                   />
                 </div>
               </div>
-
               <div className="form-row">
-                <div className="form-col-4">
+                <div className="form-col-3"> 
                   <TextField
                     fullWidth
                     label="Complemento"
@@ -618,7 +609,7 @@ const CadastroUsuario: React.FC = () => {
                     placeholder="Apto, Bloco, etc."
                   />
                 </div>
-                <div className="form-col-4">
+                <div className="form-col-4"> 
                   <TextField
                     required
                     fullWidth
@@ -635,7 +626,7 @@ const CadastroUsuario: React.FC = () => {
                     }}
                   />
                 </div>
-                <div className="form-col-3">
+                <div className="form-col-3"> 
                   <TextField
                     required
                     fullWidth
@@ -652,17 +643,17 @@ const CadastroUsuario: React.FC = () => {
                     }}
                   />
                 </div>
-                <div className="form-col-1">
+                <div className="form-col-2"> 
                   <TextField
                     required
                     fullWidth
-                    label="UF"
+                    label="Estado (UF)"
                     name="endereco.estado"
                     value={formData.endereco.estado}
                     onChange={handleChange}
                     inputProps={{ maxLength: 2 }}
                     placeholder="SC"
-                    helperText={formData.endereco.estado && !cepError ? '✅ Auto' : ''}
+                    helperText={formData.endereco.estado && !cepError ? '✅ Automático' : ''}
                     InputProps={{
                       style: {
                         backgroundColor: formData.endereco.estado && !cepError ? 'rgba(76, 175, 80, 0.1)' : undefined
