@@ -242,3 +242,51 @@
 .cadastro-button {
   transition: all 0.2s ease-in-out !important;
 }
+
+.campo-preenchido {
+  background-color: rgba(76, 175, 80, 0.1) !important;
+  border-left: 3px solid #4caf50 !important;
+}
+
+.cep-loading {
+  position: relative;
+}
+
+.cep-loading::after {
+  content: '🔍';
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.MuiTextField-root .MuiFormHelperText-root {
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+.MuiTextField-root .MuiFormHelperText-root.Mui-error {
+  color: #d32f2f;
+}
+
+.campo-animacao {
+  animation: fillAnimation 0.5s ease-in-out;
+}
+
+@keyframes fillAnimation {
+  0% {
+    background-color: rgba(76, 175, 80, 0.3);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: rgba(76, 175, 80, 0.1);
+    transform: scale(1);
+  }
+}

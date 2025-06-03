@@ -30,6 +30,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import type { Usuario } from '../../types';
 import './CadastroUsuario.css';
+import { buscarCep } from '../../services/viaCep';
 
 const CadastroUsuario: React.FC = () => {
   const navigate = useNavigate();
@@ -59,6 +60,8 @@ const CadastroUsuario: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -114,18 +117,84 @@ const CadastroUsuario: React.FC = () => {
       .replace(/(-\d{3})\d+?$/, '$1');
   };
 
-  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCep(e.target.value);
-    setFormData(prev => ({
-      ...prev,
-      endereco: {
-        ...prev.endereco,
-        cep: formatted
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const cep = e.target.value.replace(/\D/g, '');
+  const cepFormatado = formatCep(cep);
+  
+  setFormData(prev => ({
+    ...prev,
+    endereco: {
+      ...prev.endereco,
+      cep: cepFormatado
+    }
+  }));
+  
+  setCepError('');
+  setError('');
+  setSuccess('');
+  
+  if (cep.length === 8) {
+    setCepLoading(true);
+    
+    try {
+      const dadosCep = await buscarCep(cep);
+      
+      if (dadosCep) {
+        setFormData(prev => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            cep: cepFormatado,
+            logradouro: dadosCep.logradouro,
+            bairro: dadosCep.bairro,
+            cidade: dadosCep.localidade,
+            estado: dadosCep.uf,
+            complemento: prev.endereco.complemento 
+          }
+        }));
+        
+        setSuccess('✅ CEP encontrado! Dados preenchidos automaticamente.');
+        
+        setTimeout(() => {
+          setSuccess('');
+        }, 3000);
+        
+      } else {
+        setCepError('CEP não encontrado. Verifique e tente novamente.');
+        setFormData(prev => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            cep: cepFormatado,
+            logradouro: '',
+            bairro: '',
+            cidade: '',
+            estado: ''
+          }
+        }));
       }
-    }));
-    setError('');
-    setSuccess('');
-  };
+    } catch (error) {
+      setCepError('Erro ao buscar CEP. Tente novamente.');
+      console.error('Erro na busca do CEP:', error);
+    } finally {
+      setCepLoading(false);
+    }
+  } else {
+    if (cep.length < 8) {
+      setFormData(prev => ({
+        ...prev,
+        endereco: {
+          ...prev.endereco,
+          cep: cepFormatado,
+          logradouro: '',
+          bairro: '',
+          cidade: '',
+          estado: ''
+        }
+      }));
+    }
+  }
+};
 
   const validateForm = (): boolean => {
     if (!formData.nome.trim()) {
@@ -490,7 +559,15 @@ const CadastroUsuario: React.FC = () => {
                     onChange={handleCepChange}
                     inputProps={{ maxLength: 9 }}
                     placeholder="00000-000"
-                    helperText="Formato: 00000-000"
+                    helperText={
+                      cepLoading 
+                        ? '🔍 Buscando CEP...' 
+                        : cepError 
+                          ? cepError 
+                          : 'Digite o CEP para preencher automaticamente'
+                    }
+                    error={!!cepError}
+                    disabled={cepLoading}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -509,6 +586,12 @@ const CadastroUsuario: React.FC = () => {
                     value={formData.endereco.logradouro}
                     onChange={handleChange}
                     placeholder="Rua, Avenida, etc."
+                    helperText={formData.endereco.logradouro && !cepError ? '✅ Preenchido automaticamente' : ''}
+                    InputProps={{
+                      style: {
+                        backgroundColor: formData.endereco.logradouro && !cepError ? 'rgba(76, 175, 80, 0.1)' : undefined
+                      }
+                    }}
                   />
                 </div>
                 <div className="form-col-2">
@@ -544,6 +627,12 @@ const CadastroUsuario: React.FC = () => {
                     value={formData.endereco.bairro}
                     onChange={handleChange}
                     placeholder="Nome do bairro"
+                    helperText={formData.endereco.bairro && !cepError ? '✅ Preenchido automaticamente' : ''}
+                    InputProps={{
+                      style: {
+                        backgroundColor: formData.endereco.bairro && !cepError ? 'rgba(76, 175, 80, 0.1)' : undefined
+                      }
+                    }}
                   />
                 </div>
                 <div className="form-col-3">
@@ -555,6 +644,12 @@ const CadastroUsuario: React.FC = () => {
                     value={formData.endereco.cidade}
                     onChange={handleChange}
                     placeholder="Nome da cidade"
+                    helperText={formData.endereco.cidade && !cepError ? '✅ Preenchido automaticamente' : ''}
+                    InputProps={{
+                      style: {
+                        backgroundColor: formData.endereco.cidade && !cepError ? 'rgba(76, 175, 80, 0.1)' : undefined
+                      }
+                    }}
                   />
                 </div>
                 <div className="form-col-1">
@@ -567,10 +662,15 @@ const CadastroUsuario: React.FC = () => {
                     onChange={handleChange}
                     inputProps={{ maxLength: 2 }}
                     placeholder="SC"
+                    helperText={formData.endereco.estado && !cepError ? '✅ Auto' : ''}
+                    InputProps={{
+                      style: {
+                        backgroundColor: formData.endereco.estado && !cepError ? 'rgba(76, 175, 80, 0.1)' : undefined
+                      }
+                    }}
                   />
                 </div>
               </div>
-
             </div>
 
             <Button
