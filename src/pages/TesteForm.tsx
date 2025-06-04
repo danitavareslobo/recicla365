@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Box, TextField } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
+import { Person, Email, Lock, Phone } from '@mui/icons-material';
 import Navbar from '../components/Navbar/Navbar';
+import FormField from '../components/Form/FormField/FormField';
 import FormContainer from '../components/Form/Form';
 
-const TesteForm: React.FC = () => {
+const Dashboard: React.FC = () => {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
+    senha: '',
+    telefone: '',
     descricao: ''
   });
   
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,41 +22,34 @@ const TesteForm: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    setError('');
-    setSuccess('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
-
-    if (!formData.nome || !formData.email) {
-      setError('Por favor, preencha os campos obrigatórios');
+    setTimeout(() => {
+      setSuccess('✅ FormField funcionando perfeitamente!');
       setLoading(false);
-      return;
-    }
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setSuccess('✅ Formulário enviado com sucesso!');
-      console.log('Dados enviados:', formData);
-    } catch (err) {
-      setError('❌ Erro ao enviar formulário');
-    } finally {
-      setLoading(false);
-    }
+    }, 1500);
   };
 
   const handleReset = () => {
     setFormData({
       nome: '',
       email: '',
+      senha: '',
+      telefone: '',
       descricao: ''
     });
-    setError('');
     setSuccess('');
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email)) {
+      return 'Email inválido';
+    }
+    return undefined;
   };
 
   return (
@@ -61,80 +57,86 @@ const TesteForm: React.FC = () => {
       <Navbar />
       
       <FormContainer
-        title="🧪 Teste do Form Container"
-        subtitle="Testando todos os recursos do formulário"
+        title="🧪 Teste FormField Component"
+        subtitle="Testando campos reutilizáveis com validação"
         onSubmit={handleSubmit}
         onReset={handleReset}
         loading={loading}
-        error={error}
         success={success}
-        submitText="Enviar Teste"
-        resetText="Limpar Tudo"
-        maxWidth="md"
       >
         <div className="form-row">
-          <div className="form-col-8">
-            <TextField
-              required
-              fullWidth
-              label="Nome Completo"
+          <div className="form-col-6">
+            <FormField
               name="nome"
+              label="Nome Completo"
               value={formData.nome}
               onChange={handleChange}
+              required
+              startIcon={<Person />}
               placeholder="Digite seu nome"
+              tooltip="Nome que aparecerá no sistema"
+              maxLength={50}
+              showCharCount
             />
           </div>
-          <div className="form-col-4">
-            <TextField
-              required
-              fullWidth
-              label="Email"
+          <div className="form-col-6">
+            <FormField
               name="email"
-              type="email"
+              label="Email"
               value={formData.email}
               onChange={handleChange}
+              type="email"
+              required
+              startIcon={<Email />}
               placeholder="seu@email.com"
+              validate={validateEmail}
+              helperText="Será usado para login"
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-col-6">
+            <FormField
+              name="senha"
+              label="Senha"
+              value={formData.senha}
+              onChange={handleChange}
+              type="password"
+              required
+              startIcon={<Lock />}
+              placeholder="Mínimo 6 caracteres"
+              helperText="Use números e letras"
+            />
+          </div>
+          <div className="form-col-6">
+            <FormField
+              name="telefone"
+              label="Telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              type="tel"
+              startIcon={<Phone />}
+              placeholder="(47) 99999-9999"
+              pattern="[0-9\s\(\)\-]+"
             />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-col-12">
-            <TextField
-              fullWidth
-              label="Descrição"
+            <FormField
               name="descricao"
-              multiline
-              rows={4}
+              label="Descrição"
               value={formData.descricao}
               onChange={handleChange}
-              placeholder="Descreva algo interessante..."
+              multiline
+              rows={3}
+              placeholder="Conte um pouco sobre você..."
+              maxLength={200}
+              showCharCount
+              helperText="Descrição opcional"
             />
-          </div>
-        </div>
-
-        <div className="form-section">
-          <h3 className="form-section-title">
-            📋 Seção de Exemplo
-          </h3>
-          <div className="form-row">
-            <div className="form-col-6">
-              <TextField
-                fullWidth
-                label="Campo 1"
-                placeholder="Exemplo de campo"
-                disabled
-                value="Campo desabilitado"
-              />
-            </div>
-            <div className="form-col-6">
-              <TextField
-                fullWidth
-                label="Campo 2"
-                placeholder="Outro exemplo"
-                helperText="Este é um texto de ajuda"
-              />
-            </div>
           </div>
         </div>
       </FormContainer>
@@ -142,4 +144,4 @@ const TesteForm: React.FC = () => {
   );
 };
 
-export default TesteForm;
+export default Dashboard;
