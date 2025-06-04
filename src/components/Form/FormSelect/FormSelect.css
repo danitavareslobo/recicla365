@@ -26,10 +26,9 @@
 }
 
 .form-select-control .MuiInputLabel-root.MuiInputLabel-shrink {
-  transform: translate(14px, -9px) scale(1) !important; 
+  transform: translate(14px, -9px) scale(0.75) !important;
   background: white !important;
   padding: 0 4px !important;
-  font-size: 12px !important;
 }
 
 .form-select-control.Mui-error .MuiOutlinedInput-root {
@@ -92,66 +91,5 @@
   .form-select-control .MuiSelect-select {
     font-size: 0.9rem !important;
     padding: 12px 14px !important;
-  }
-}
-
-.MuiFormControl-root label,
-.MuiInputLabel-root {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #333 !important;
-}
-
-.form-col-4:nth-child(3) .MuiInputLabel-root {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #333 !important;
-}
-
-.form-select-control .MuiInputLabel-root,
-.form-select-control .MuiInputLabel-root.MuiInputLabel-shrink,
-.form-select-control .MuiInputLabel-root.Mui-focused,
-.form-select-control .MuiInputLabel-root.MuiInputLabel-filled {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #333 !important;
-}
-
-.form-select-control .MuiInputLabel-root.MuiInputLabel-shrink {
-    font-size: 12px !important; 
-    font-weight: 500 !important;
-    color: #333 !important;
-    transform: translate(14px, -9px) scale(1) !important; 
-}
-
-.form-select-control .MuiInputLabel-root.Mui-focused {
-    color: #2e7d32 !important;
-    font-size: 12px !important; /* Consistente com o shrink */
-    font-weight: 500 !important;
-}
-
-.form-select-control .MuiInputLabel-root {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #333 !important;
-    transition: all 0.2s ease !important;
-    transform-origin: top left !important;
-}
-
-.form-select-control .MuiInputLabel-root.MuiInputLabel-shrink {
-    transform: translate(14px, -9px) scale(1) !important; 
-    background: white !important;
-    padding: 0 4px !important;
-    font-size: 12px !important;
-}
-
-@media (max-width: 600px) {
-  .form-select-control .MuiInputLabel-root {
-    font-size: 14px !important; 
-    font-weight: 500 !important;
-  }
-  
-  .form-select-control .MuiInputLabel-root.MuiInputLabel-shrink {
-    font-size: 12px !important;
   }
 }

@@ -60,36 +60,10 @@ form label {
     color: #333 !important;
 }
 
-.form-col-4 .MuiFormControl-root .MuiInputLabel-root,
-.form-col-4 .css-q8hpuo-MuiFormControl-root .MuiInputLabel-root,
-div[class*="form-col-4"] label[class*="MuiInputLabel"] {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #333 !important;
-    line-height: 1.4375em !important;
-}
-
-.form-col-4 .MuiInputLabel-root.MuiInputLabel-sizeMedium,
-.form-col-4 .MuiInputLabel-root.Mui-focused,
-.form-col-4 .MuiInputLabel-root.MuiInputLabel-animated {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-}
-
-div:has([name="interesses"]) * {
-    font-size: 14px !important;
-    color: #333 !important;
-    font-weight: 500 !important;
-}
-
-div:has([name="interesses"]) select,
-div:has([name="interesses"]) .MuiInputBase-input,
-div:has([name="interesses"]) .MuiSelect-select {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #333 !important;
-}
-
-div:has([name="interesses"]) .MuiInputBase-root.Mui-focused {
-    border-color: #2e7d32 !important;
+.form-label-standard {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
 }
