@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
 import { Container, Typography, Box } from '@mui/material';
-import { Person, Email, Lock, Phone } from '@mui/icons-material';
+import { 
+  Person, 
+  Email, 
+  Lock, 
+  LocationOn, 
+  Category,
+  Star
+} from '@mui/icons-material';
 import Navbar from '../components/Navbar/Navbar';
-import FormField from '../components/Form/FormField/FormField';
 import FormContainer from '../components/Form/Form';
+import FormField from '../components/Form/FormField/FormField';
+import FormSelect, { type SelectOption } from '../components/Form/FormSelect/FormSelect';
 
 const Dashboard: React.FC = () => {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
-    senha: '',
-    telefone: '',
-    descricao: ''
+    sexo: '',
+    estado: '',
+    interesses: [] as string[]
   });
   
   const [loading, setLoading] = useState(false);
@@ -24,12 +32,20 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  const handleSelectChange = (name: string) => (value: string | number | string[] | number[]) => {
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      setSuccess('✅ FormField funcionando perfeitamente!');
+      setSuccess('✅ Formulário funcionando perfeitamente!');
       setLoading(false);
+      console.log('Dados:', formData);
     }, 1500);
   };
 
@@ -37,28 +53,40 @@ const Dashboard: React.FC = () => {
     setFormData({
       nome: '',
       email: '',
-      senha: '',
-      telefone: '',
-      descricao: ''
+      sexo: '',
+      estado: '',
+      interesses: []
     });
     setSuccess('');
   };
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
-      return 'Email inválido';
-    }
-    return undefined;
-  };
+  const sexoOptions: SelectOption[] = [
+    { value: 'masculino', label: 'Masculino' },
+    { value: 'feminino', label: 'Feminino' },
+    { value: 'outro', label: 'Outro' }
+  ];
+
+  const estadoOptions: SelectOption[] = [
+    { value: 'SC', label: 'Santa Catarina' },
+    { value: 'SP', label: 'São Paulo' },
+    { value: 'RJ', label: 'Rio de Janeiro' },
+    { value: 'PR', label: 'Paraná' },
+    { value: 'RS', label: 'Rio Grande do Sul' }
+  ];
+
+  const interessesOptions: SelectOption[] = [
+    { value: 'reciclagem', label: 'Reciclagem', icon: <Category /> },
+    { value: 'meio-ambiente', label: 'Meio Ambiente', icon: <LocationOn /> },
+    { value: 'sustentabilidade', label: 'Sustentabilidade', icon: <Star /> }
+  ];
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       <Navbar />
       
       <FormContainer
-        title="🧪 Teste FormField Component"
-        subtitle="Testando campos reutilizáveis com validação"
+        title="🧪 Teste FormField + FormSelect"
+        subtitle="Versão simplificada e funcional"
         onSubmit={handleSubmit}
         onReset={handleReset}
         loading={loading}
@@ -74,9 +102,6 @@ const Dashboard: React.FC = () => {
               required
               startIcon={<Person />}
               placeholder="Digite seu nome"
-              tooltip="Nome que aparecerá no sistema"
-              maxLength={50}
-              showCharCount
             />
           </div>
           <div className="form-col-6">
@@ -89,53 +114,43 @@ const Dashboard: React.FC = () => {
               required
               startIcon={<Email />}
               placeholder="seu@email.com"
-              validate={validateEmail}
-              helperText="Será usado para login"
             />
           </div>
         </div>
 
         <div className="form-row">
-          <div className="form-col-6">
-            <FormField
-              name="senha"
-              label="Senha"
-              value={formData.senha}
-              onChange={handleChange}
-              type="password"
+          <div className="form-col-4">
+            <FormSelect
+              name="sexo"
+              label="Sexo"
+              value={formData.sexo}
+              onChange={handleSelectChange('sexo')}
+              options={sexoOptions}
               required
-              startIcon={<Lock />}
-              placeholder="Mínimo 6 caracteres"
-              helperText="Use números e letras"
+              placeholder="Selecione seu sexo"
             />
           </div>
-          <div className="form-col-6">
-            <FormField
-              name="telefone"
-              label="Telefone"
-              value={formData.telefone}
-              onChange={handleChange}
-              type="tel"
-              startIcon={<Phone />}
-              placeholder="(47) 99999-9999"
-              pattern="[0-9\s\(\)\-]+"
+          <div className="form-col-4">
+            <FormSelect
+              name="estado"
+              label="Estado"
+              value={formData.estado}
+              onChange={handleSelectChange('estado')}
+              options={estadoOptions}
+              required
+              placeholder="Selecione seu estado"
             />
           </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-col-12">
-            <FormField
-              name="descricao"
-              label="Descrição"
-              value={formData.descricao}
-              onChange={handleChange}
-              multiline
-              rows={3}
-              placeholder="Conte um pouco sobre você..."
-              maxLength={200}
-              showCharCount
-              helperText="Descrição opcional"
+          <div className="form-col-4">
+            <FormSelect
+              name="interesses"
+              label="Interesses"
+              value={formData.interesses}
+              onChange={handleSelectChange('interesses')}
+              options={interessesOptions}
+              multiple
+              showChips
+              placeholder="Múltipla seleção"
             />
           </div>
         </div>

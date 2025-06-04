@@ -27,3 +27,29 @@ body {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+.form-fields > * {
+  position: relative;
+  z-index: 1;
+}
+
+.form-row {
+  position: relative;
+  z-index: 1;
+}
+
+.MuiPopover-root {
+  z-index: 1300 !important;
+}
+
+.MuiModal-root {
+  z-index: 1300 !important;
+}
+
+.form-row + .form-row {
+  margin-top: 0.5rem;
+}
+
+.form-section + .form-row {
+  margin-top: 1rem;
+}
