@@ -139,7 +139,7 @@ const FormSelect: React.FC<FormSelectProps> = ({
     
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        {label}
+        <span className="form-label-standard">{label}</span>
         <Tooltip title={tooltip} arrow>
           <Help sx={{ fontSize: '1rem', color: 'text.secondary' }} />
         </Tooltip>
