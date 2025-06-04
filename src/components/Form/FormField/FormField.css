@@ -1,0 +1,138 @@
+.form-field {
+  margin: 0.5rem 0 !important;
+}
+
+.form-field .MuiOutlinedInput-root {
+  border-radius: 8px !important;
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease !important;
+}
+
+.form-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+}
+
+.form-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+  border-width: 2px !important;
+}
+
+.form-field .MuiInputLabel-root.Mui-focused {
+  color: #2e7d32 !important;
+}
+
+.form-field.error .MuiOutlinedInput-root {
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.form-field.error .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #f44336 !important;
+}
+
+.form-field.error .MuiInputLabel-root {
+  color: #f44336 !important;
+}
+
+.form-field.disabled .MuiOutlinedInput-root {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.form-field.disabled .MuiInputLabel-root {
+  color: rgba(0, 0, 0, 0.38) !important;
+}
+
+.form-field .MuiInputBase-multiline {
+  padding: 0 !important;
+}
+
+.form-field .MuiInputBase-inputMultiline {
+  padding: 16.5px 14px !important;
+  min-height: unset !important;
+}
+
+.form-field .MuiInputAdornment-root {
+  color: #666 !important;
+}
+
+.form-field .MuiInputAdornment-root .MuiSvgIcon-root {
+  transition: color 0.2s ease !important;
+}
+
+.form-field .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root {
+  color: #2e7d32 !important;
+}
+
+.form-field .MuiFormHelperText-root {
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+  font-size: 0.75rem !important;
+}
+
+.form-field .MuiFormHelperText-root.Mui-error {
+  color: #f44336 !important;
+}
+
+.form-field .MuiIconButton-root {
+  color: #666 !important;
+  transition: color 0.2s ease !important;
+}
+
+.form-field .MuiIconButton-root:hover {
+  color: #2e7d32 !important;
+  background-color: rgba(46, 125, 50, 0.04) !important;
+}
+
+.form-field .MuiTooltip-tooltip {
+  background-color: #2e7d32 !important;
+  font-size: 0.75rem !important;
+}
+
+.form-field .MuiTooltip-arrow {
+  color: #2e7d32 !important;
+}
+
+.form-field .MuiOutlinedInput-root {
+  transition: background-color 0.2s ease, border-color 0.2s ease !important;
+}
+
+.form-field .MuiInputLabel-root {
+  transition: color 0.2s ease !important;
+}
+
+@media (max-width: 600px) {
+  .form-field .MuiInputLabel-root {
+    font-size: 0.9rem !important;
+  }
+  
+  .form-field .MuiInputBase-input {
+    font-size: 0.9rem !important;
+  }
+  
+  .form-field .MuiFormHelperText-root {
+    font-size: 0.7rem !important;
+  }
+}
+
+.form-field.success .MuiOutlinedInput-root {
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.form-field.success .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #4caf50 !important;
+}
+
+.form-field.warning .MuiOutlinedInput-root {
+  background-color: rgba(255, 152, 0, 0.05);
+}
+
+.form-field.warning .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #ff9800 !important;
+}
+
+.form-field .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1) !important;
+}
+
+.form-field.error .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.1) !important;
+}

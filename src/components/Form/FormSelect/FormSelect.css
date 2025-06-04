@@ -1,0 +1,95 @@
+.form-select-control {
+  margin: 0.5rem 0 !important;
+}
+
+.form-select-control .MuiOutlinedInput-root {
+  border-radius: 8px !important;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.form-select-control .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+}
+
+.form-select-control .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+  border-width: 2px !important;
+}
+
+.form-select-control .MuiInputLabel-root {
+  transition: all 0.2s ease !important;
+  transform-origin: top left !important;
+}
+
+.form-select-control .MuiInputLabel-root.Mui-focused {
+  color: #2e7d32 !important;
+}
+
+.form-select-control .MuiInputLabel-root.MuiInputLabel-shrink {
+  transform: translate(14px, -9px) scale(0.75) !important;
+  background: white !important;
+  padding: 0 4px !important;
+}
+
+.form-select-control.Mui-error .MuiOutlinedInput-root {
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.form-select-control.Mui-error .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #f44336 !important;
+}
+
+.form-select-control.Mui-error .MuiInputLabel-root {
+  color: #f44336 !important;
+}
+
+.form-select-control .MuiSelect-select {
+  padding: 16.5px 14px !important;
+  min-height: 1.4375em !important;
+}
+
+.form-select-control .MuiSelect-select.MuiSelect-multiple {
+  padding: 12px 14px !important;
+}
+
+.form-select-control .MuiSelect-select:empty::before {
+  content: attr(placeholder);
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}
+
+.form-select-control .MuiFormHelperText-root {
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+  font-size: 0.75rem !important;
+}
+
+.form-select-control .MuiFormHelperText-root.Mui-error {
+  color: #f44336 !important;
+}
+
+.form-select-empty {
+  margin: 0.5rem 0 !important;
+  opacity: 0.6;
+}
+
+.form-select-control .MuiSelect-icon {
+  color: #666 !important;
+  transition: transform 0.2s ease !important;
+}
+
+.form-select-control .MuiOutlinedInput-root.Mui-focused .MuiSelect-icon {
+  color: #2e7d32 !important;
+  transform: rotate(180deg) !important;
+}
+
+@media (max-width: 600px) {
+  .form-select-control .MuiInputLabel-root {
+    font-size: 0.9rem !important;
+  }
+  
+  .form-select-control .MuiSelect-select {
+    font-size: 0.9rem !important;
+    padding: 12px 14px !important;
+  }
+}
