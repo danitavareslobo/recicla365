@@ -176,6 +176,22 @@
   margin-top: 0.25rem;
 }
 
+.address-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.address-field-large {
+  grid-column: 1;
+}
+
+.address-field-small {
+  grid-column: 2;
+  min-width: 120px;
+}
+
 .cadastro-local__placeholder {
   background: #f8f9fa;
   border: 2px dashed #dee2e6;
@@ -208,6 +224,16 @@
 
   .form-section__title {
     font-size: 1.3rem;
+  }
+
+  .address-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .address-field-large,
+  .address-field-small {
+    grid-column: 1;
   }
 
   .cadastro-local__placeholder {
