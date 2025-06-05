@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Loading from '../../components/Loading/Loading';
 import FormField from '../../components/Form/FormField/FormField';
 import FormSelect from '../../components/Form/FormSelect/FormSelect';
+import Button from '../../components/Button/Button';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import { useCollectionPoints } from '../../context/CollectionPointsContext';
 import type { TipoResiduo } from '../../context/CollectionPointsContext';
 import './ListagemLocais.css';
@@ -10,6 +13,7 @@ import './ListagemLocais.css';
 const ListagemLocais: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { locaisColeta } = useCollectionPoints();
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTipoResiduo, setSelectedTipoResiduo] = useState<string>('');
@@ -70,13 +74,23 @@ const ListagemLocais: React.FC = () => {
     setSelectedStatus(String(value));
   };
 
+  const handleAddNew = () => {
+    navigate('/cadastro-local');
+  };
+
+  const hasActiveFilters = searchTerm || selectedTipoResiduo || selectedStatus;
+
   return (
     <div className="listagem-locais-page">
       <Navbar />
       
       {isLoading && (
         <div className="listagem-locais__loading">
-          <Loading />
+          <Loading 
+            text="Carregando locais..." 
+            fullScreen={false}
+            withLogo={false}
+          />
         </div>
       )}
 
@@ -133,22 +147,161 @@ const ListagemLocais: React.FC = () => {
                 )}
               </div>
               
-              {(searchTerm || selectedTipoResiduo || selectedStatus) && (
-                <button 
-                  type="button"
+              {hasActiveFilters && (
+                <Button 
+                  variant="secondary"
                   onClick={handleClearFilters}
-                  className="filters__clear-btn"
+                  size="small"
+                  icon="✖️"
+                  tooltip="Remover todos os filtros aplicados"
                 >
-                  ✖️ Limpar filtros
-                </button>
+                  Limpar filtros
+                </Button>
               )}
             </div>
           </div>
 
-          <div className="listagem-locais__list">
-            <div className="listagem-locais__placeholder">
-              Lista de locais com botões de ação será implementada em etapas posteriores
+          {locaisColeta.length > 0 && (
+            <div className="listagem-locais__list-header">
+              <div className="list-header__info">
+                <h3 className="list-header__title">
+                  {locaisFiltrados.length === locaisColeta.length 
+                    ? `Todos os locais (${locaisColeta.length})`
+                    : `Resultados filtrados (${locaisFiltrados.length} de ${locaisColeta.length})`
+                  }
+                </h3>
+              </div>
+              
+              <div className="list-header__actions">
+                <Button
+                  variant="primary"
+                  onClick={handleAddNew}
+                  size="medium"
+                  icon="➕"
+                  tooltip="Cadastrar novo local de coleta"
+                >
+                  Adicionar Local
+                </Button>
+              </div>
             </div>
+          )}
+
+          <div className="listagem-locais__list">
+            {locaisColeta.length === 0 ? (
+              <EmptyState
+                type="no-data"
+                title="Nenhum local cadastrado"
+                description="Ainda não há locais de coleta cadastrados na plataforma. Comece adicionando o primeiro local para começar a gerenciar os pontos de coleta de resíduos."
+                actionButton={{
+                  text: "Cadastrar Primeiro Local",
+                  onClick: handleAddNew,
+                  variant: "primary"
+                }}
+              />
+            ) : 
+            locaisFiltrados.length === 0 ? (
+              <EmptyState
+                type="no-results"
+                title="Nenhum resultado encontrado"
+                description={hasActiveFilters 
+                  ? "Não encontramos locais que correspondam aos filtros aplicados. Tente ajustar os critérios de busca ou remover alguns filtros."
+                  : "Nenhum local encontrado."
+                }
+                actionButton={{
+                  text: "Limpar Filtros",
+                  onClick: handleClearFilters,
+                  variant: "secondary"
+                }}
+                secondaryButton={{
+                  text: "Cadastrar Novo Local",
+                  onClick: handleAddNew,
+                  variant: "primary"
+                }}
+              />
+            ) : 
+            (
+              <div className="listagem-locais__results">
+                <div className="results-preview">
+                  <div className="results-preview__header">
+                    <h4 className="results-preview__title">
+                      📍 Locais encontrados ({locaisFiltrados.length})
+                    </h4>
+                    <p className="results-preview__subtitle">
+                      Lista completa com cards e ações será implementada nas próximas etapas
+                    </p>
+                  </div>
+                  
+                  <div className="results-preview__list">
+                    {locaisFiltrados.slice(0, 5).map((local) => (
+                      <div key={local.id} className="result-preview-item">
+                        <div className="result-preview-item__header">
+                          <h5 className="result-preview-item__name">{local.nomeLocal}</h5>
+                          <span className={`result-preview-item__status ${local.ativo ? 'active' : 'inactive'}`}>
+                            {local.ativo ? '✅ Ativo' : '❌ Inativo'}
+                          </span>
+                        </div>
+                        
+                        <div className="result-preview-item__info">
+                          <p className="result-preview-item__address">
+                            📍 {local.localizacao.logradouro}, {local.localizacao.numero} - {local.localizacao.bairro}
+                          </p>
+                          <p className="result-preview-item__city">
+                            {local.localizacao.cidade}/{local.localizacao.estado}
+                          </p>
+                          <p className="result-preview-item__types">
+                            ♻️ {local.tiposResiduos.slice(0, 3).join(', ')}
+                            {local.tiposResiduos.length > 3 && ` +${local.tiposResiduos.length - 3}`}
+                          </p>
+                        </div>
+
+                        <div className="result-preview-item__actions">
+                          <Button
+                            variant="view"
+                            onClick={() => alert(`👁️ Visualizar: ${local.nomeLocal}`)}
+                            size="small"
+                            tooltip="Visualizar detalhes"
+                          >
+                            Ver
+                          </Button>
+                          
+                          <Button
+                            variant="edit"
+                            onClick={() => alert(`✏️ Editar: ${local.nomeLocal}`)}
+                            size="small"
+                            tooltip="Editar local"
+                          >
+                            Editar
+                          </Button>
+                          
+                          <Button
+                            variant="delete"
+                            onClick={() => alert(`🗑️ Excluir: ${local.nomeLocal}`)}
+                            size="small"
+                            tooltip="Excluir local"
+                            confirmMessage={`Tem certeza que deseja excluir o local "${local.nomeLocal}"? Esta ação não pode ser desfeita.`}
+                          >
+                            Excluir
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {locaisFiltrados.length > 5 && (
+                      <div className="results-preview__more">
+                        <p>... e mais {locaisFiltrados.length - 5} locais</p>
+                        <Button
+                          variant="secondary"
+                          onClick={() => alert('Lista completa será implementada em breve!')}
+                          size="small"
+                        >
+                          Ver todos os {locaisFiltrados.length} locais
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
