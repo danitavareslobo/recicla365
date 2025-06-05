@@ -67,7 +67,7 @@ const Navbar: React.FC<NavbarProps> = ({ showUserInfo = true }) => {
     },
     {
       label: 'Cadastrar Local',
-      path: '/cadastro-local',
+      path: '/locais/cadastro',
       icon: <Add />
     },
     {
