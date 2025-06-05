@@ -329,30 +329,7 @@ html, body {
 }
 
 .location-button {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.location-button:hover:not(:disabled) {
-  background: #2980b9;
-  transform: translateY(-1px);
-}
-
-.location-button:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-  transform: none;
+  display: none; 
 }
 
 .coordinates-info {
@@ -397,48 +374,18 @@ html, body {
 }
 
 .btn {
-  padding: 0.875rem 2rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 140px;
+  display: none; 
+}
+
+.form-actions .action-button {
+  min-width: 160px;
   justify-content: center;
 }
 
-.btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-  transform: none;
-}
-
-.btn--primary {
-  background: #27ae60;
-  color: white;
-  box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
-}
-
-.btn--primary:hover:not(:disabled) {
-  background: #229954;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
-}
-
-.btn--secondary {
-  background: #95a5a6;
-  color: white;
-  box-shadow: 0 2px 4px rgba(149, 165, 166, 0.2);
-}
-
-.btn--secondary:hover:not(:disabled) {
-  background: #7f8c8d;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+.location-actions .action-button {
+  margin-bottom: 1rem;
+  width: 100%;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
@@ -493,11 +440,6 @@ html, body {
     padding: 1rem;
   }
 
-  .location-button {
-    width: 100%;
-    justify-content: center;
-  }
-
   .waste-types-grid {
     grid-template-columns: 1fr;
   }
@@ -507,9 +449,13 @@ html, body {
     gap: 0.75rem;
   }
 
-  .btn {
+  .form-actions .action-button {
     width: 100%;
-    padding: 1rem;
+    min-width: auto;
+  }
+
+  .location-actions .action-button {
+    width: 100%;
   }
 }
 
@@ -540,11 +486,6 @@ html, body {
     padding: 0.75rem;
   }
 
-  .location-button {
-    padding: 0.625rem 1rem;
-    font-size: 0.9rem;
-  }
-
   .waste-type-label {
     padding: 0.75rem;
   }
@@ -562,7 +503,7 @@ html, body {
     padding-top: 1.5rem;
   }
 
-  .btn {
+  .form-actions .action-button {
     padding: 0.875rem;
     font-size: 0.9rem;
   }

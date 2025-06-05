@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Loading from '../../components/Loading/Loading';
 import FormField from '../../components/Form/FormField/FormField';
+import Button from '../../components/Button/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useCollectionPoints } from '../../context/CollectionPointsContext';
 import type { LocalColeta, TipoResiduo } from '../../context/CollectionPointsContext';
@@ -630,18 +631,17 @@ const CadastroLocal: React.FC = () => {
                   </div>
 
                   <div className="location-actions">
-                    <button
-                      type="button"
+                    <Button
+                      variant="view"
                       onClick={handleGetCurrentLocation}
                       disabled={isLoadingLocation}
-                      className="location-button"
+                      loading={isLoadingLocation}
+                      icon="📍"
+                      size="medium"
+                      tooltip="Obter coordenadas da localização atual"
                     >
-                      {isLoadingLocation ? (
-                        <>⏳ Obtendo localização...</>
-                      ) : (
-                        <>📍 Usar minha localização atual</>
-                      )}
-                    </button>
+                      {isLoadingLocation ? 'Obtendo localização...' : 'Usar minha localização atual'}
+                    </Button>
                     
                     <div className="coordinates-info">
                       <small className="form-hint">
@@ -671,25 +671,48 @@ const CadastroLocal: React.FC = () => {
             </div>
 
             <div className="form-actions">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={handleCancel}
-                className="btn btn--secondary"
                 disabled={isSaving}
+                icon="❌"
+                size="large"
+                confirmMessage={
+                  (formData.nomeLocal.trim() || 
+                   formData.descricaoLocal.trim() || 
+                   formData.endereco.cep.trim() || 
+                   formData.tiposResiduos.length > 0 || 
+                   formData.coordenadas.latitude || 
+                   formData.coordenadas.longitude) 
+                    ? "⚠️ Você tem alterações não salvas. Deseja realmente cancelar?" 
+                    : undefined
+                }
               >
-                ❌ Cancelar
-              </button>
+                Cancelar
+              </Button>
               
               <button
                 type="submit"
-                className="btn btn--primary"
                 disabled={isSaving}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  margin: 0,
+                  cursor: 'pointer'
+                }}
               >
-                {isSaving ? (
-                  <>⏳ Salvando...</>
-                ) : (
-                  <>💾 Cadastrar Local</>
-                )}
+                <Button
+                  variant="primary"
+                  onClick={() => {}} 
+                  disabled={isSaving}
+                  loading={isSaving}
+                  icon="💾"
+                  size="large"
+                  tooltip="Salvar local de coleta"
+                >
+                  {isSaving ? 'Salvando...' : 'Cadastrar Local'}
+                </Button>
               </button>
             </div>
           </form>
