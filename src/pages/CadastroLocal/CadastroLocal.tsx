@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import Loading from '../../components/Loading/Loading';
 import FormField from '../../components/Form/FormField/FormField';
+import FormCheckboxGroup from '../../components/Form/FormCheckboxGroup/FormCheckboxGroup';
 import { useAuth } from '../../context/AuthContext';
+import type { LocalColeta, TipoResiduo } from '../../context/CollectionPointsContext';
 import './CadastroLocal.css';
 
 const CadastroLocal: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { usuario } = useAuth();
 
+  // Estados do formulário
   const [formData, setFormData] = useState({
     nomeLocal: '',
     descricaoLocal: '',
@@ -21,11 +24,23 @@ const CadastroLocal: React.FC = () => {
       bairro: '',
       cidade: '',
       estado: ''
-    }
+    },
+    tiposResiduos: [] as TipoResiduo[]
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+
+  const tiposResiduosOptions = [
+    { value: 'Vidro', label: 'Vidro', icon: '🥃' },
+    { value: 'Metal', label: 'Metal', icon: '⚙️' },
+    { value: 'Papel', label: 'Papel', icon: '📄' },
+    { value: 'Plástico', label: 'Plástico', icon: '♻️' },
+    { value: 'Orgânico', label: 'Orgânico', icon: '🌱' },
+    { value: 'Baterias', label: 'Baterias', icon: '🔋' },
+    { value: 'Eletrônicos', label: 'Eletrônicos', icon: '💻' },
+    { value: 'Óleo', label: 'Óleo', icon: '🛢️' }
+  ] as const;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -107,6 +122,20 @@ const CadastroLocal: React.FC = () => {
     }
   };
 
+  const handleTiposResiduosChange = (selectedValues: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      tiposResiduos: selectedValues as TipoResiduo[]
+    }));
+
+    if (selectedValues.length > 0 && errors.tiposResiduos) {
+      setErrors(prev => ({
+        ...prev,
+        tiposResiduos: ''
+      }));
+    }
+  };
+
   const validateBasicFields = () => {
     const newErrors: Record<string, string> = {};
 
@@ -140,6 +169,10 @@ const CadastroLocal: React.FC = () => {
 
     if (!formData.endereco.estado.trim()) {
       newErrors.estado = 'Estado é obrigatório';
+    }
+
+    if (formData.tiposResiduos.length === 0) {
+      newErrors.tiposResiduos = 'Selecione pelo menos um tipo de resíduo';
     }
 
     setErrors(newErrors);
@@ -336,8 +369,35 @@ const CadastroLocal: React.FC = () => {
               )}
             </div>
 
+            <div className="form-section">
+              <h2 className="form-section__title">Tipos de Resíduos Aceitos</h2>
+              <p className="form-section__description">
+                Selecione os tipos de materiais recicláveis que este local aceita:
+              </p>
+              
+              <FormCheckboxGroup
+                options={tiposResiduosOptions}
+                selectedValues={formData.tiposResiduos}
+                onChange={handleTiposResiduosChange}
+                name="tiposResiduos"
+                error={!!errors.tiposResiduos}
+              />
+              
+              {errors.tiposResiduos && (
+                <div className="error-message">{errors.tiposResiduos}</div>
+              )}
+              
+              <div className="selected-count">
+                {formData.tiposResiduos.length > 0 && (
+                  <p className="form-hint">
+                    ✅ {formData.tiposResiduos.length} tipo{formData.tiposResiduos.length > 1 ? 's' : ''} selecionado{formData.tiposResiduos.length > 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="cadastro-local__placeholder">
-              Seções de tipos de resíduos e coordenadas serão implementadas nas próximas etapas
+              Seção de coordenadas geográficas será implementada na próxima etapa
             </div>
           </form>
         </div>
