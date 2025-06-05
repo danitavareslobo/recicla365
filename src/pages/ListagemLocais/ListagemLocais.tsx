@@ -6,6 +6,7 @@ import FormField from '../../components/Form/FormField/FormField';
 import FormSelect from '../../components/Form/FormSelect/FormSelect';
 import Button from '../../components/Button/Button';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import ListControls from '../../components/ListControls/ListControls';
 import { useCollectionPoints } from '../../context/CollectionPointsContext';
 import type { TipoResiduo } from '../../context/CollectionPointsContext';
 import './ListagemLocais.css';
@@ -18,6 +19,10 @@ const ListagemLocais: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTipoResiduo, setSelectedTipoResiduo] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [sortBy, setSortBy] = useState('dataCadastro');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const tiposResiduosOptions = [
     { value: '', label: 'Todos os tipos' },
@@ -56,6 +61,33 @@ const ListagemLocais: React.FC = () => {
     });
   }, [locaisColeta, searchTerm, selectedTipoResiduo, selectedStatus]);
 
+  const locaisOrdenados = useMemo(() => {
+    const sorted = [...locaisFiltrados].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'nomeLocal':
+          comparison = a.nomeLocal.localeCompare(b.nomeLocal);
+          break;
+        case 'dataCadastro':
+          comparison = new Date(a.dataCadastro).getTime() - new Date(b.dataCadastro).getTime();
+          break;
+        case 'cidade':
+          comparison = a.localizacao.cidade.localeCompare(b.localizacao.cidade);
+          break;
+        case 'status':
+          comparison = a.ativo === b.ativo ? 0 : a.ativo ? -1 : 1;
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return sorted;
+  }, [locaisFiltrados, sortBy, sortOrder]);
+
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedTipoResiduo('');
@@ -74,8 +106,17 @@ const ListagemLocais: React.FC = () => {
     setSelectedStatus(String(value));
   };
 
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+  };
+
+  const handleViewModeChange = (mode: 'cards' | 'table') => {
+    setViewMode(mode);
+  };
+
   const handleAddNew = () => {
-    navigate('/locais/cadastro');
+    navigate('/cadastro-local');
   };
 
   const hasActiveFilters = searchTerm || selectedTipoResiduo || selectedStatus;
@@ -161,29 +202,18 @@ const ListagemLocais: React.FC = () => {
             </div>
           </div>
 
-          {locaisColeta.length > 0 && (
-            <div className="listagem-locais__list-header">
-              <div className="list-header__info">
-                <h3 className="list-header__title">
-                  {locaisFiltrados.length === locaisColeta.length 
-                    ? `Todos os locais (${locaisColeta.length})`
-                    : `Resultados filtrados (${locaisFiltrados.length} de ${locaisColeta.length})`
-                  }
-                </h3>
-              </div>
-              
-              <div className="list-header__actions">
-                <Button
-                  variant="primary"
-                  onClick={handleAddNew}
-                  size="medium"
-                  icon="➕"
-                  tooltip="Cadastrar novo local de coleta"
-                >
-                  Adicionar Local
-                </Button>
-              </div>
-            </div>
+          {locaisColeta.length > 0 && locaisFiltrados.length > 0 && (
+            <ListControls
+              totalItems={locaisColeta.length}
+              filteredItems={locaisFiltrados.length}
+              viewMode={viewMode}
+              onViewModeChange={handleViewModeChange}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={handleSortChange}
+              onAddNew={handleAddNew}
+              loading={isLoading}
+            />
           )}
 
           <div className="listagem-locais__list">
@@ -224,15 +254,15 @@ const ListagemLocais: React.FC = () => {
                 <div className="results-preview">
                   <div className="results-preview__header">
                     <h4 className="results-preview__title">
-                      📍 Locais encontrados ({locaisFiltrados.length})
+                      {viewMode === 'cards' ? '📋' : '📊'} Visualização em {viewMode === 'cards' ? 'Cards' : 'Tabela'}
                     </h4>
                     <p className="results-preview__subtitle">
-                      Lista completa com cards e ações será implementada nas próximas etapas
+                      Ordenado por: <strong>{sortBy}</strong> ({sortOrder === 'asc' ? 'Crescente' : 'Decrescente'})
                     </p>
                   </div>
                   
                   <div className="results-preview__list">
-                    {locaisFiltrados.slice(0, 5).map((local) => (
+                    {locaisOrdenados.slice(0, 5).map((local) => (
                       <div key={local.id} className="result-preview-item">
                         <div className="result-preview-item__header">
                           <h5 className="result-preview-item__name">{local.nomeLocal}</h5>
@@ -251,6 +281,9 @@ const ListagemLocais: React.FC = () => {
                           <p className="result-preview-item__types">
                             ♻️ {local.tiposResiduos.slice(0, 3).join(', ')}
                             {local.tiposResiduos.length > 3 && ` +${local.tiposResiduos.length - 3}`}
+                          </p>
+                          <p className="result-preview-item__date">
+                            🗓️ Cadastrado em: {new Date(local.dataCadastro).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
 
@@ -286,15 +319,15 @@ const ListagemLocais: React.FC = () => {
                       </div>
                     ))}
                     
-                    {locaisFiltrados.length > 5 && (
+                    {locaisOrdenados.length > 5 && (
                       <div className="results-preview__more">
-                        <p>... e mais {locaisFiltrados.length - 5} locais</p>
+                        <p>... e mais {locaisOrdenados.length - 5} locais ordenados por {sortBy}</p>
                         <Button
                           variant="secondary"
-                          onClick={() => alert('Lista completa será implementada em breve!')}
+                          onClick={() => alert(`Lista completa em modo ${viewMode} será implementada na próxima etapa!`)}
                           size="small"
                         >
-                          Ver todos os {locaisFiltrados.length} locais
+                          Ver todos os {locaisOrdenados.length} locais
                         </Button>
                       </div>
                     )}
