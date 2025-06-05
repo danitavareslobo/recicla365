@@ -7,13 +7,14 @@ import FormSelect from '../../components/Form/FormSelect/FormSelect';
 import Button from '../../components/Button/Button';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import ListControls from '../../components/ListControls/ListControls';
+import LocationList from '../../components/LocationList/LocationList';
 import { useCollectionPoints } from '../../context/CollectionPointsContext';
-import type { TipoResiduo } from '../../context/CollectionPointsContext';
+import type { TipoResiduo, LocalColeta } from '../../context/CollectionPointsContext';
 import './ListagemLocais.css';
 
 const ListagemLocais: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { locaisColeta } = useCollectionPoints();
+  const { locaisColeta, excluirLocalColeta } = useCollectionPoints();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -116,7 +117,36 @@ const ListagemLocais: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    navigate('/cadastro-local');
+    navigate('/locais/cadastro');
+  };
+
+  const handleViewLocal = (local: LocalColeta) => {
+    alert(`👁️ Visualizar: ${local.nomeLocal}\n\nLocalização: ${local.localizacao.cidade}/${local.localizacao.estado}\nStatus: ${local.ativo ? 'Ativo' : 'Inativo'}\nTipos: ${local.tiposResiduos.join(', ')}`);
+  };
+
+  const handleEditLocal = (local: LocalColeta) => {
+    alert(`✏️ Editar: ${local.nomeLocal}\n\nFuncionalidade de edição será implementada em breve!`);
+    };
+
+  const handleDeleteLocal = async (local: LocalColeta) => {
+    setIsLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const sucesso = await excluirLocalColeta(local.id);
+      
+      if (sucesso) {
+        alert(`✅ Local "${local.nomeLocal}" removido com sucesso!`);
+      } else {
+        alert('❌ Erro ao remover local. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao remover local:', error);
+      alert('❌ Erro inesperado ao remover local.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const hasActiveFilters = searchTerm || selectedTipoResiduo || selectedStatus;
@@ -128,7 +158,7 @@ const ListagemLocais: React.FC = () => {
       {isLoading && (
         <div className="listagem-locais__loading">
           <Loading 
-            text="Carregando locais..." 
+            text="Processando..." 
             fullScreen={false}
             withLogo={false}
           />
@@ -250,90 +280,14 @@ const ListagemLocais: React.FC = () => {
               />
             ) : 
             (
-              <div className="listagem-locais__results">
-                <div className="results-preview">
-                  <div className="results-preview__header">
-                    <h4 className="results-preview__title">
-                      {viewMode === 'cards' ? '📋' : '📊'} Visualização em {viewMode === 'cards' ? 'Cards' : 'Tabela'}
-                    </h4>
-                    <p className="results-preview__subtitle">
-                      Ordenado por: <strong>{sortBy}</strong> ({sortOrder === 'asc' ? 'Crescente' : 'Decrescente'})
-                    </p>
-                  </div>
-                  
-                  <div className="results-preview__list">
-                    {locaisOrdenados.slice(0, 5).map((local) => (
-                      <div key={local.id} className="result-preview-item">
-                        <div className="result-preview-item__header">
-                          <h5 className="result-preview-item__name">{local.nomeLocal}</h5>
-                          <span className={`result-preview-item__status ${local.ativo ? 'active' : 'inactive'}`}>
-                            {local.ativo ? '✅ Ativo' : '❌ Inativo'}
-                          </span>
-                        </div>
-                        
-                        <div className="result-preview-item__info">
-                          <p className="result-preview-item__address">
-                            📍 {local.localizacao.logradouro}, {local.localizacao.numero} - {local.localizacao.bairro}
-                          </p>
-                          <p className="result-preview-item__city">
-                            {local.localizacao.cidade}/{local.localizacao.estado}
-                          </p>
-                          <p className="result-preview-item__types">
-                            ♻️ {local.tiposResiduos.slice(0, 3).join(', ')}
-                            {local.tiposResiduos.length > 3 && ` +${local.tiposResiduos.length - 3}`}
-                          </p>
-                          <p className="result-preview-item__date">
-                            🗓️ Cadastrado em: {new Date(local.dataCadastro).toLocaleDateString('pt-BR')}
-                          </p>
-                        </div>
-
-                        <div className="result-preview-item__actions">
-                          <Button
-                            variant="view"
-                            onClick={() => alert(`👁️ Visualizar: ${local.nomeLocal}`)}
-                            size="small"
-                            tooltip="Visualizar detalhes"
-                          >
-                            Ver
-                          </Button>
-                          
-                          <Button
-                            variant="edit"
-                            onClick={() => alert(`✏️ Editar: ${local.nomeLocal}`)}
-                            size="small"
-                            tooltip="Editar local"
-                          >
-                            Editar
-                          </Button>
-                          
-                          <Button
-                            variant="delete"
-                            onClick={() => alert(`🗑️ Excluir: ${local.nomeLocal}`)}
-                            size="small"
-                            tooltip="Excluir local"
-                            confirmMessage={`Tem certeza que deseja excluir o local "${local.nomeLocal}"? Esta ação não pode ser desfeita.`}
-                          >
-                            Excluir
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {locaisOrdenados.length > 5 && (
-                      <div className="results-preview__more">
-                        <p>... e mais {locaisOrdenados.length - 5} locais ordenados por {sortBy}</p>
-                        <Button
-                          variant="secondary"
-                          onClick={() => alert(`Lista completa em modo ${viewMode} será implementada na próxima etapa!`)}
-                          size="small"
-                        >
-                          Ver todos os {locaisOrdenados.length} locais
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <LocationList
+                locais={locaisOrdenados}
+                viewMode={viewMode}
+                onView={handleViewLocal}
+                onEdit={handleEditLocal}
+                onDelete={handleDeleteLocal}
+                loading={isLoading}
+              />
             )}
           </div>
         </div>
