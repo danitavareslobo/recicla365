@@ -64,11 +64,75 @@ html, body {
 .listagem-locais__filters {
   background: white;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 2rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border: 1px solid #e9ecef;
   max-width: 100%;
   overflow-x: hidden;
+}
+
+.filters__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #27ae60;
+}
+
+.filters__row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filters__search {
+  grid-column: 1;
+}
+
+.filters__select {
+  display: flex;
+  flex-direction: column;
+}
+
+.filters__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.filters__results {
+  font-size: 1rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.filters__total {
+  color: #7f8c8d;
+  font-weight: normal;
+}
+
+.filters__clear-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.filters__clear-btn:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
 }
 
 .listagem-locais__list {
@@ -108,7 +172,26 @@ html, body {
 
   .listagem-locais__filters,
   .listagem-locais__list {
-    padding: 1rem;
+    padding: 1.5rem;
+  }
+
+  .filters__row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .filters__search {
+    grid-column: 1;
+  }
+
+  .filters__info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .filters__clear-btn {
+    align-self: flex-end;
   }
 
   .listagem-locais__placeholder {
@@ -128,7 +211,20 @@ html, body {
 
   .listagem-locais__filters,
   .listagem-locais__list {
-    padding: 0.75rem;
+    padding: 1rem;
+  }
+
+  .filters__title {
+    font-size: 1.3rem;
+  }
+
+  .filters__row {
+    gap: 0.75rem;
+  }
+
+  .filters__clear-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
   }
 
   .listagem-locais__placeholder {
