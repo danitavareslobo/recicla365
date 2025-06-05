@@ -6,6 +6,7 @@ import Login from './pages/Login/Login';
 import CadastroUsuario from './pages/CadastroUsuario/CadastroUsuario';
 import Dashboard from './pages/Dashboard/Dashboard';
 import CadastroLocal from './pages/CadastroLocal/CadastroLocal';
+import ListagemLocais from './pages/ListagemLocais/ListagemLocais';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -58,7 +59,7 @@ const AppRoutes: React.FC = () => {
               <CadastroLocal />
             </ProtectedRoute>
           } 
-        />
+        /> */}
         
         <Route 
           path="/locais" 
@@ -67,7 +68,7 @@ const AppRoutes: React.FC = () => {
               <ListagemLocais />
             </ProtectedRoute>
           } 
-        /> */}
+        /> 
 
         <Route 
           path="/" 

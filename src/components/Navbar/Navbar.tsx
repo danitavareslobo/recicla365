@@ -72,7 +72,7 @@ const Navbar: React.FC<NavbarProps> = ({ showUserInfo = true }) => {
     },
     {
       label: 'Listar Locais',
-      path: '/listagem-locais',
+      path: '/locais',
       icon: <List />
     }
   ];

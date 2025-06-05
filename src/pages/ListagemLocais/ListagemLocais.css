@@ -1,0 +1,138 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.listagem-locais-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 50%, #e1f5e1 100%);
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+.listagem-locais__loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.listagem-locais {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 70px);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.listagem-locais__header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.listagem-locais__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.listagem-locais__subtitle {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.listagem-locais__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.listagem-locais__filters {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.listagem-locais__list {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.listagem-locais__placeholder {
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .listagem-locais {
+    padding: 1rem;
+    min-height: calc(100vh - 60px);
+  }
+
+  .listagem-locais__title {
+    font-size: 2rem;
+  }
+
+  .listagem-locais__subtitle {
+    font-size: 1rem;
+  }
+
+  .listagem-locais__filters,
+  .listagem-locais__list {
+    padding: 1rem;
+  }
+
+  .listagem-locais__placeholder {
+    padding: 2rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .listagem-locais {
+    padding: 0.75rem;
+  }
+
+  .listagem-locais__title {
+    font-size: 1.8rem;
+  }
+
+  .listagem-locais__filters,
+  .listagem-locais__list {
+    padding: 0.75rem;
+  }
+
+  .listagem-locais__placeholder {
+    padding: 1.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}
