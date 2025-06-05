@@ -1,0 +1,118 @@
+.dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 50%, #e1f5e1 100%);
+}
+
+.dashboard {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 70px); 
+}
+
+.dashboard__header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.dashboard__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard__subtitle {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.dashboard__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.dashboard__status-section,
+.dashboard__locations-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+}
+
+.dashboard__section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #27ae60;
+}
+
+.dashboard__status-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard__locations-list {
+  margin-top: 1rem;
+}
+
+.dashboard__placeholder {
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+    min-height: calc(100vh - 60px); 
+  }
+
+  .dashboard__title {
+    font-size: 2rem;
+  }
+
+  .dashboard__subtitle {
+    font-size: 1rem;
+  }
+
+  .dashboard__status-section,
+  .dashboard__locations-section {
+    padding: 1rem;
+  }
+
+  .dashboard__section-title {
+    font-size: 1.3rem;
+  }
+
+  .dashboard__status-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 0.5rem;
+  }
+
+  .dashboard__title {
+    font-size: 1.8rem;
+  }
+
+  .dashboard__status-section,
+  .dashboard__locations-section {
+    padding: 0.75rem;
+  }
+}
