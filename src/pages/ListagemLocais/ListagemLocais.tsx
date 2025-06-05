@@ -75,7 +75,7 @@ const ListagemLocais: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    navigate('/cadastro-local');
+    navigate('/locais/cadastro');
   };
 
   const hasActiveFilters = searchTerm || selectedTipoResiduo || selectedStatus;
