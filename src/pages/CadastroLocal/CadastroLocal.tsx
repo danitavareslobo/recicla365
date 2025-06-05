@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Loading from '../../components/Loading/Loading';
 import FormField from '../../components/Form/FormField/FormField';
 import { useAuth } from '../../context/AuthContext';
+import { useCollectionPoints } from '../../context/CollectionPointsContext';
 import type { LocalColeta, TipoResiduo } from '../../context/CollectionPointsContext';
 import './CadastroLocal.css';
 
 const CadastroLocal: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const { usuario } = useAuth();
+  const { criarLocalColeta } = useCollectionPoints();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     nomeLocal: '',
@@ -31,8 +39,6 @@ const CadastroLocal: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const tiposResiduosOptions = [
     { value: 'Vidro', label: 'Vidro' },
@@ -200,20 +206,6 @@ const CadastroLocal: React.FC = () => {
     );
   };
 
-  const handleTiposResiduosChange = (selectedValues: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      tiposResiduos: selectedValues as TipoResiduo[]
-    }));
-
-    if (selectedValues.length > 0 && errors.tiposResiduos) {
-      setErrors(prev => ({
-        ...prev,
-        tiposResiduos: ''
-      }));
-    }
-  };
-
   const validateBasicFields = () => {
     const newErrors: Record<string, string> = {};
 
@@ -276,11 +268,77 @@ const CadastroLocal: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateBasicFields()) {
+      const firstError = document.querySelector('.error-message');
+      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const novoLocal = {
+        nomeLocal: formData.nomeLocal.trim(),
+        descricaoLocal: formData.descricaoLocal.trim(),
+        identificadorUsuario: usuario?.id || '',
+        localizacao: {
+          cep: formData.endereco.cep.trim(),
+          logradouro: formData.endereco.logradouro.trim(),
+          numero: formData.endereco.numero.trim(),
+          complemento: formData.endereco.complemento.trim(),
+          bairro: formData.endereco.bairro.trim(),
+          cidade: formData.endereco.cidade.trim(),
+          estado: formData.endereco.estado.trim(),
+          latitude: formData.coordenadas.latitude ? Number(formData.coordenadas.latitude) : undefined,
+          longitude: formData.coordenadas.longitude ? Number(formData.coordenadas.longitude) : undefined
+        },
+        tiposResiduos: formData.tiposResiduos,
+        ativo: true
+      };
+
+      const sucesso = await criarLocalColeta(novoLocal);
+
+      if (sucesso) {
+        alert('✅ Local de coleta cadastrado com sucesso!');
+        navigate('/dashboard');
+      } else {
+        alert('❌ Erro ao cadastrar local de coleta. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar local:', error);
+      alert('❌ Erro inesperado ao cadastrar local de coleta.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    const hasChanges = 
+      formData.nomeLocal.trim() ||
+      formData.descricaoLocal.trim() ||
+      formData.endereco.cep.trim() ||
+      formData.tiposResiduos.length > 0 ||
+      formData.coordenadas.latitude ||
+      formData.coordenadas.longitude;
+
+    if (hasChanges) {
+      const confirmCancel = window.confirm(
+        '⚠️ Você tem alterações não salvas. Deseja realmente cancelar?'
+      );
+      if (!confirmCancel) return;
+    }
+
+    navigate('/dashboard');
+  };
+
   return (
     <div className="cadastro-local-page">
       <Navbar />
       
-      {(isLoading || isLoadingAddress || isLoadingLocation) && (
+      {(isLoading || isLoadingAddress || isLoadingLocation || isSaving) && (
         <div className="cadastro-local__loading">
           <Loading />
         </div>
@@ -295,321 +353,344 @@ const CadastroLocal: React.FC = () => {
         </div>
 
         <div className="cadastro-local__content">
-          <form className="cadastro-local__form">
-            <div className="form-section">
-              <h2 className="form-section__title">Informações Básicas</h2>
-              
-              <FormField
-                label="Nome do Local"
-                name="nomeLocal"
-                type="text"
-                value={formData.nomeLocal}
-                onChange={handleInputChange}
-                placeholder="Ex: EcoPonto Centro"
-                required
-                error={!!errors.nomeLocal}
-                maxLength={100}
-              />
-              {errors.nomeLocal && (
-                <div className="error-message">{errors.nomeLocal}</div>
-              )}
-
-              <div className="form-group">
-                <label htmlFor="descricaoLocal" className="form-label">
-                  Descrição do Local <span className="required">*</span>
-                </label>
-                <textarea
-                  id="descricaoLocal"
-                  name="descricaoLocal"
-                  value={formData.descricaoLocal}
-                  onChange={handleInputChange}
-                  placeholder="Descreva o local de coleta, horários de funcionamento, observações importantes..."
-                  className={`form-textarea ${errors.descricaoLocal ? 'error' : ''}`}
-                  rows={4}
-                  maxLength={500}
-                />
-                {errors.descricaoLocal && (
-                  <div className="error-message">{errors.descricaoLocal}</div>
-                )}
-                <div className="character-counter">
-                  {formData.descricaoLocal.length}/500 caracteres
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="identificadorUsuario" className="form-label">
-                  Responsável pelo Cadastro
-                </label>
-                <input
+          <form className="cadastro-local__form" onSubmit={handleSubmit}>
+            <div className="form-row">
+              <div className="form-section form-section--half">
+                <h2 className="form-section__title">Informações Básicas</h2>
+                
+                <FormField
+                  label="Nome do Local"
+                  name="nomeLocal"
                   type="text"
-                  id="identificadorUsuario"
-                  name="identificadorUsuario"
-                  value={usuario?.nome || 'Usuário não identificado'}
-                  className="form-input readonly"
-                  readOnly
+                  value={formData.nomeLocal}
+                  onChange={handleInputChange}
+                  placeholder="Ex: EcoPonto Centro"
+                  required
+                  error={!!errors.nomeLocal}
+                  maxLength={100}
                 />
-                <div className="form-hint">
-                  Este local será vinculado ao seu usuário
+                {errors.nomeLocal && (
+                  <div className="error-message">{errors.nomeLocal}</div>
+                )}
+
+                <div className="form-group">
+                  <label htmlFor="descricaoLocal" className="form-label">
+                    Descrição do Local <span className="required">*</span>
+                  </label>
+                  <textarea
+                    id="descricaoLocal"
+                    name="descricaoLocal"
+                    value={formData.descricaoLocal}
+                    onChange={handleInputChange}
+                    placeholder="Descreva o local de coleta, horários de funcionamento, observações importantes..."
+                    className={`form-textarea ${errors.descricaoLocal ? 'error' : ''}`}
+                    rows={4}
+                    maxLength={500}
+                  />
+                  {errors.descricaoLocal && (
+                    <div className="error-message">{errors.descricaoLocal}</div>
+                  )}
+                  <div className="character-counter">
+                    {formData.descricaoLocal.length}/500 caracteres
+                  </div>
                 </div>
+
+                <div className="form-group">
+                  <label htmlFor="identificadorUsuario" className="form-label">
+                    Responsável pelo Cadastro
+                  </label>
+                  <input
+                    type="text"
+                    id="identificadorUsuario"
+                    name="identificadorUsuario"
+                    value={usuario?.nome || 'Usuário não identificado'}
+                    className="form-input readonly"
+                    readOnly
+                  />
+                  <div className="form-hint">
+                    Este local será vinculado ao seu usuário
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-section form-section--half">
+                <h2 className="form-section__title">Localização</h2>
+                
+                <FormField
+                  label="CEP"
+                  name="cep"
+                  type="text"
+                  value={formData.endereco.cep}
+                  onChange={handleCEPChange}
+                  placeholder="00000-000"
+                  required
+                  error={!!errors.cep}
+                  maxLength={9}
+                />
+                {errors.cep && (
+                  <div className="error-message">{errors.cep}</div>
+                )}
+
+                <div className="address-row">
+                  <div className="address-field-large">
+                    <FormField
+                      label="Logradouro"
+                      name="logradouro"
+                      type="text"
+                      value={formData.endereco.logradouro}
+                      onChange={handleAddressChange}
+                      placeholder="Rua, Avenida, etc."
+                      required
+                      error={!!errors.logradouro}
+                    />
+                    {errors.logradouro && (
+                      <div className="error-message">{errors.logradouro}</div>
+                    )}
+                  </div>
+
+                  <div className="address-field-small">
+                    <FormField
+                      label="Número"
+                      name="numero"
+                      type="text"
+                      value={formData.endereco.numero}
+                      onChange={handleAddressChange}
+                      placeholder="123"
+                      required
+                      error={!!errors.numero}
+                    />
+                    {errors.numero && (
+                      <div className="error-message">{errors.numero}</div>
+                    )}
+                  </div>
+                </div>
+
+                <FormField
+                  label="Complemento"
+                  name="complemento"
+                  type="text"
+                  value={formData.endereco.complemento}
+                  onChange={handleAddressChange}
+                  placeholder="Sala, Apartamento, etc. (opcional)"
+                  error={!!errors.complemento}
+                />
+
+                <div className="address-row">
+                  <div className="address-field-large">
+                    <FormField
+                      label="Bairro"
+                      name="bairro"
+                      type="text"
+                      value={formData.endereco.bairro}
+                      onChange={handleAddressChange}
+                      placeholder="Nome do bairro"
+                      required
+                      error={!!errors.bairro}
+                    />
+                    {errors.bairro && (
+                      <div className="error-message">{errors.bairro}</div>
+                    )}
+                  </div>
+
+                  <div className="address-field-small">
+                    <FormField
+                      label="Estado"
+                      name="estado"
+                      type="text"
+                      value={formData.endereco.estado}
+                      onChange={handleAddressChange}
+                      placeholder="SC"
+                      required
+                      error={!!errors.estado}
+                      maxLength={2}
+                    />
+                    {errors.estado && (
+                      <div className="error-message">{errors.estado}</div>
+                    )}
+                  </div>
+                </div>
+
+                <FormField
+                  label="Cidade"
+                  name="cidade"
+                  type="text"
+                  value={formData.endereco.cidade}
+                  onChange={handleAddressChange}
+                  placeholder="Nome da cidade"
+                  required
+                  error={!!errors.cidade}
+                />
+                {errors.cidade && (
+                  <div className="error-message">{errors.cidade}</div>
+                )}
               </div>
             </div>
 
-            <div className="form-section">
-              <h2 className="form-section__title">Localização</h2>
-              
-              <FormField
-                label="CEP"
-                name="cep"
-                type="text"
-                value={formData.endereco.cep}
-                onChange={handleCEPChange}
-                placeholder="00000-000"
-                required
-                error={!!errors.cep}
-                maxLength={9}
-              />
-              {errors.cep && (
-                <div className="error-message">{errors.cep}</div>
-              )}
-
-              <div className="address-row">
-                <div className="address-field-large">
-                  <FormField
-                    label="Logradouro"
-                    name="logradouro"
-                    type="text"
-                    value={formData.endereco.logradouro}
-                    onChange={handleAddressChange}
-                    placeholder="Rua, Avenida, etc."
-                    required
-                    error={!!errors.logradouro}
-                  />
-                  {errors.logradouro && (
-                    <div className="error-message">{errors.logradouro}</div>
-                  )}
-                </div>
-
-                <div className="address-field-small">
-                  <FormField
-                    label="Número"
-                    name="numero"
-                    type="text"
-                    value={formData.endereco.numero}
-                    onChange={handleAddressChange}
-                    placeholder="123"
-                    required
-                    error={!!errors.numero}
-                  />
-                  {errors.numero && (
-                    <div className="error-message">{errors.numero}</div>
-                  )}
-                </div>
-              </div>
-
-              <FormField
-                label="Complemento"
-                name="complemento"
-                type="text"
-                value={formData.endereco.complemento}
-                onChange={handleAddressChange}
-                placeholder="Sala, Apartamento, etc. (opcional)"
-                error={!!errors.complemento}
-              />
-
-              <div className="address-row">
-                <div className="address-field-large">
-                  <FormField
-                    label="Bairro"
-                    name="bairro"
-                    type="text"
-                    value={formData.endereco.bairro}
-                    onChange={handleAddressChange}
-                    placeholder="Nome do bairro"
-                    required
-                    error={!!errors.bairro}
-                  />
-                  {errors.bairro && (
-                    <div className="error-message">{errors.bairro}</div>
-                  )}
-                </div>
-
-                <div className="address-field-small">
-                  <FormField
-                    label="Estado"
-                    name="estado"
-                    type="text"
-                    value={formData.endereco.estado}
-                    onChange={handleAddressChange}
-                    placeholder="SC"
-                    required
-                    error={!!errors.estado}
-                    maxLength={2}
-                  />
-                  {errors.estado && (
-                    <div className="error-message">{errors.estado}</div>
-                  )}
-                </div>
-              </div>
-
-              <FormField
-                label="Cidade"
-                name="cidade"
-                type="text"
-                value={formData.endereco.cidade}
-                onChange={handleAddressChange}
-                placeholder="Nome da cidade"
-                required
-                error={!!errors.cidade}
-              />
-              {errors.cidade && (
-                <div className="error-message">{errors.cidade}</div>
-              )}
-            </div>
-
-            <div className="form-section">
-              <h2 className="form-section__title">Tipos de Resíduos Aceitos</h2>
-              <p className="form-section__description">
-                Selecione os tipos de materiais recicláveis que este local aceita:
-              </p>
-              
-              <div className="waste-types-grid">
-                {tiposResiduosOptions.map((tipo) => (
-                  <div key={tipo.value} className="waste-type-option">
-                    <label className="waste-type-label">
-                      <input
-                        type="checkbox"
-                        value={tipo.value}
-                        checked={formData.tiposResiduos.includes(tipo.value as TipoResiduo)}
-                        onChange={(e) => {
-                          const value = e.target.value as TipoResiduo;
-                          const isChecked = e.target.checked;
-                          
-                          setFormData(prev => ({
-                            ...prev,
-                            tiposResiduos: isChecked
-                              ? [...prev.tiposResiduos, value]
-                              : prev.tiposResiduos.filter(t => t !== value)
-                          }));
-                          
-                          if (isChecked && errors.tiposResiduos) {
-                            setErrors(prev => ({
+            <div className="form-row">
+              <div className="form-section form-section--half">
+                <h2 className="form-section__title">Tipos de Resíduos Aceitos</h2>
+                <p className="form-section__description">
+                  Selecione os tipos de materiais recicláveis que este local aceita:
+                </p>
+                
+                <div className="waste-types-grid">
+                  {tiposResiduosOptions.map((tipo) => (
+                    <div key={tipo.value} className="waste-type-option">
+                      <label className="waste-type-label">
+                        <input
+                          type="checkbox"
+                          value={tipo.value}
+                          checked={formData.tiposResiduos.includes(tipo.value as TipoResiduo)}
+                          onChange={(e) => {
+                            const value = e.target.value as TipoResiduo;
+                            const isChecked = e.target.checked;
+                            
+                            setFormData(prev => ({
                               ...prev,
-                              tiposResiduos: ''
+                              tiposResiduos: isChecked
+                                ? [...prev.tiposResiduos, value]
+                                : prev.tiposResiduos.filter(t => t !== value)
                             }));
-                          }
-                        }}
-                        className="waste-type-checkbox"
-                      />
-                      <span className="waste-type-icon">
-                        {tipo.value === 'Vidro' && '🥃'}
-                        {tipo.value === 'Metal' && '⚙️'}
-                        {tipo.value === 'Papel' && '📄'}
-                        {tipo.value === 'Plástico' && '♻️'}
-                        {tipo.value === 'Orgânico' && '🌱'}
-                        {tipo.value === 'Baterias' && '🔋'}
-                        {tipo.value === 'Eletrônicos' && '💻'}
-                        {tipo.value === 'Óleo' && '🛢️'}
-                      </span>
-                      <span className="waste-type-text">{tipo.label}</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-              
-              {errors.tiposResiduos && (
-                <div className="error-message">{errors.tiposResiduos}</div>
-              )}
-              
-              <div className="selected-count">
-                {formData.tiposResiduos.length > 0 && (
-                  <p className="form-hint">
-                    ✅ {formData.tiposResiduos.length} tipo{formData.tiposResiduos.length > 1 ? 's' : ''} selecionado{formData.tiposResiduos.length > 1 ? 's' : ''}
-                  </p>
+                            
+                            if (isChecked && errors.tiposResiduos) {
+                              setErrors(prev => ({
+                                ...prev,
+                                tiposResiduos: ''
+                              }));
+                            }
+                          }}
+                          className="waste-type-checkbox"
+                        />
+                        <span className="waste-type-icon">
+                          {tipo.value === 'Vidro' && '🥃'}
+                          {tipo.value === 'Metal' && '⚙️'}
+                          {tipo.value === 'Papel' && '📄'}
+                          {tipo.value === 'Plástico' && '♻️'}
+                          {tipo.value === 'Orgânico' && '🌱'}
+                          {tipo.value === 'Baterias' && '🔋'}
+                          {tipo.value === 'Eletrônicos' && '💻'}
+                          {tipo.value === 'Óleo' && '🛢️'}
+                        </span>
+                        <span className="waste-type-text">{tipo.label}</span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                
+                {errors.tiposResiduos && (
+                  <div className="error-message">{errors.tiposResiduos}</div>
                 )}
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h2 className="form-section__title">Coordenadas Geográficas</h2>
-              <p className="form-section__description">
-                Adicione as coordenadas para localização precisa no mapa (opcional):
-              </p>
-
-              <div className="coordinates-container">
-                <div className="coordinates-row">
-                  <div className="coordinate-field">
-                    <FormField
-                      label="Latitude"
-                      name="latitude"
-                      type="text"
-                      value={formData.coordenadas.latitude}
-                      onChange={handleCoordinatesChange}
-                      placeholder="-26.3045"
-                      error={!!errors.latitude}
-                    />
-                    {errors.latitude && (
-                      <div className="error-message">{errors.latitude}</div>
-                    )}
-                  </div>
-
-                  <div className="coordinate-field">
-                    <FormField
-                      label="Longitude"
-                      name="longitude"
-                      type="text"
-                      value={formData.coordenadas.longitude}
-                      onChange={handleCoordinatesChange}
-                      placeholder="-48.8487"
-                      error={!!errors.longitude}
-                    />
-                    {errors.longitude && (
-                      <div className="error-message">{errors.longitude}</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="location-actions">
-                  <button
-                    type="button"
-                    onClick={handleGetCurrentLocation}
-                    disabled={isLoadingLocation}
-                    className="location-button"
-                  >
-                    {isLoadingLocation ? (
-                      <>⏳ Obtendo localização...</>
-                    ) : (
-                      <>📍 Usar minha localização atual</>
-                    )}
-                  </button>
-                  
-                  <div className="coordinates-info">
-                    <small className="form-hint">
-                      💡 Dica: Use o botão acima para obter automaticamente sua localização atual, 
-                      ou pesquise as coordenadas no Google Maps.
-                    </small>
-                  </div>
-                </div>
-
-                {(formData.coordenadas.latitude && formData.coordenadas.longitude) && (
-                  <div className="coordinates-preview">
-                    <p className="coordinates-display">
-                      🌐 Coordenadas: {formData.coordenadas.latitude}, {formData.coordenadas.longitude}
+                
+                <div className="selected-count">
+                  {formData.tiposResiduos.length > 0 && (
+                    <p className="form-hint">
+                      ✅ {formData.tiposResiduos.length} tipo{formData.tiposResiduos.length > 1 ? 's' : ''} selecionado{formData.tiposResiduos.length > 1 ? 's' : ''}
                     </p>
-                    <a
-                      href={`https://www.google.com/maps?q=${formData.coordenadas.latitude},${formData.coordenadas.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="maps-link"
-                    >
-                      🗺️ Ver no Google Maps
-                    </a>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-section form-section--half">
+                <h2 className="form-section__title">Coordenadas Geográficas</h2>
+                <p className="form-section__description">
+                  Adicione as coordenadas para localização precisa no mapa (opcional):
+                </p>
+
+                <div className="coordinates-container">
+                  <div className="coordinates-row">
+                    <div className="coordinate-field">
+                      <FormField
+                        label="Latitude"
+                        name="latitude"
+                        type="text"
+                        value={formData.coordenadas.latitude}
+                        onChange={handleCoordinatesChange}
+                        placeholder="-26.3045"
+                        error={!!errors.latitude}
+                      />
+                      {errors.latitude && (
+                        <div className="error-message">{errors.latitude}</div>
+                      )}
+                    </div>
+
+                    <div className="coordinate-field">
+                      <FormField
+                        label="Longitude"
+                        name="longitude"
+                        type="text"
+                        value={formData.coordenadas.longitude}
+                        onChange={handleCoordinatesChange}
+                        placeholder="-48.8487"
+                        error={!!errors.longitude}
+                      />
+                      {errors.longitude && (
+                        <div className="error-message">{errors.longitude}</div>
+                      )}
+                    </div>
                   </div>
-                )}
+
+                  <div className="location-actions">
+                    <button
+                      type="button"
+                      onClick={handleGetCurrentLocation}
+                      disabled={isLoadingLocation}
+                      className="location-button"
+                    >
+                      {isLoadingLocation ? (
+                        <>⏳ Obtendo localização...</>
+                      ) : (
+                        <>📍 Usar minha localização atual</>
+                      )}
+                    </button>
+                    
+                    <div className="coordinates-info">
+                      <small className="form-hint">
+                        💡 Dica: Use o botão acima para obter automaticamente sua localização atual, 
+                        ou pesquise as coordenadas no Google Maps.
+                      </small>
+                    </div>
+                  </div>
+
+                  {(formData.coordenadas.latitude && formData.coordenadas.longitude) && (
+                    <div className="coordinates-preview">
+                      <p className="coordinates-display">
+                        🌐 Coordenadas: {formData.coordenadas.latitude}, {formData.coordenadas.longitude}
+                      </p>
+                      <a
+                        href={`https://www.google.com/maps?q=${formData.coordenadas.latitude},${formData.coordenadas.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="maps-link"
+                      >
+                        🗺️ Ver no Google Maps
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="cadastro-local__placeholder">
-              Botões de ação (salvar/cancelar) serão implementados na próxima etapa
+            <div className="form-actions">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="btn btn--secondary"
+                disabled={isSaving}
+              >
+                ❌ Cancelar
+              </button>
+              
+              <button
+                type="submit"
+                className="btn btn--primary"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>⏳ Salvando...</>
+                ) : (
+                  <>💾 Cadastrar Local</>
+                )}
+              </button>
             </div>
           </form>
         </div>
