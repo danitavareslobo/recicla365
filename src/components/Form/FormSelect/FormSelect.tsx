@@ -208,9 +208,10 @@ const FormSelect: React.FC<FormSelectProps> = ({
         MenuProps={{
           PaperProps: {
             style: {
-              maxHeight: 300,
+              maxHeight: 240, 
               borderRadius: '8px',
-              marginTop: '8px'
+              marginTop: '8px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)' 
             },
           },
           anchorOrigin: {
@@ -221,6 +222,8 @@ const FormSelect: React.FC<FormSelectProps> = ({
             vertical: 'top',
             horizontal: 'left',
           },
+          autoFocus: false,
+          disableAutoFocusItem: true,
         }}
         sx={{
           '& .MuiSelect-select': {
@@ -230,6 +233,9 @@ const FormSelect: React.FC<FormSelectProps> = ({
             flexWrap: 'wrap',
             gap: 0.5,
             paddingRight: '32px !important',
+          },
+          '& .MuiSelect-icon': {
+            color: '#666',
           }
         }}
       >
@@ -245,19 +251,28 @@ const FormSelect: React.FC<FormSelectProps> = ({
             value={option.value}
             disabled={option.disabled}
             sx={{
-              padding: '8px 16px',
+              padding: '10px 16px', 
+              minHeight: '40px', 
               '&:hover': {
                 backgroundColor: 'rgba(46, 125, 50, 0.04)',
               },
               '&.Mui-selected': {
                 backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                fontWeight: 500,
                 '&:hover': {
                   backgroundColor: 'rgba(46, 125, 50, 0.15)',
                 },
               },
+              overflow: 'visible'
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              width: '100%', 
+              gap: 1,
+              overflow: 'visible' 
+            }}>
               {option.icon && (
                 <Box sx={{ display: 'flex', alignItems: 'center', color: '#666' }}>
                   {option.icon}
@@ -273,9 +288,7 @@ const FormSelect: React.FC<FormSelectProps> = ({
                     fontSize: '0.75rem', 
                     color: 'text.secondary', 
                     mt: 0.25,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    lineHeight: 1.2 
                   }}>
                     {option.description}
                   </Box>
