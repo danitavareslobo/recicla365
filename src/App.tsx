@@ -5,6 +5,7 @@ import { useAuth } from './context/index';
 import Login from './pages/Login/Login';
 import CadastroUsuario from './pages/CadastroUsuario/CadastroUsuario';
 import Dashboard from './pages/Dashboard/Dashboard';
+import CadastroLocal from './pages/CadastroLocal/CadastroLocal';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -41,7 +42,7 @@ const AppRoutes: React.FC = () => {
           } 
         />
         
-        {/* <Route 
+        <Route 
           path="/locais/cadastro" 
           element={
             <ProtectedRoute>
@@ -50,7 +51,7 @@ const AppRoutes: React.FC = () => {
           } 
         />
         
-        <Route 
+        {/* <Route 
           path="/locais/editar/:id" 
           element={
             <ProtectedRoute>
