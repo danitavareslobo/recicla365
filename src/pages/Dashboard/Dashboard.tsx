@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import StatusCard from '../../components/StatusCard/StatusCard';
+import LocationCard from '../../components/LocationCard/LocationCard';
 import Loading from '../../components/Loading/Loading';
 import { useAuth } from '../../context/AuthContext';
 import { useCollectionPoints } from '../../context/CollectionPointsContext';
@@ -77,9 +78,26 @@ const Dashboard: React.FC = () => {
           <section className="dashboard__locations-section">
             <h2 className="dashboard__section-title">Locais de Coleta</h2>
             <div className="dashboard__locations-list">
-              <div className="dashboard__placeholder">
-                Lista de locais de coleta será implementada na próxima etapa
-              </div>
+              {collectionPoints.locaisColeta.length > 0 ? (
+                <>
+                  <div className="dashboard__locations-count">
+                    <p className="dashboard__count-text">
+                      Exibindo <strong>{collectionPoints.locaisColeta.length}</strong> {collectionPoints.locaisColeta.length === 1 ? 'local' : 'locais'} de coleta cadastrados
+                    </p>
+                  </div>
+                  {collectionPoints.locaisColeta.map((local) => (
+                    <LocationCard key={local.id} local={local} />
+                  ))}
+                </>
+              ) : (
+                <div className="dashboard__empty-state">
+                  <div className="dashboard__empty-icon">📍</div>
+                  <h3 className="dashboard__empty-title">Nenhum local cadastrado</h3>
+                  <p className="dashboard__empty-description">
+                    Ainda não há locais de coleta cadastrados na plataforma.
+                  </p>
+                </div>
+              )}
             </div>
           </section>
         </div>

@@ -7,6 +7,8 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 .status-card:hover {
@@ -127,7 +129,6 @@
   font-weight: 500;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .status-card {
     padding: 1.25rem;
