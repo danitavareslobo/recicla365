@@ -1,59 +1,108 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Button } from '@mui/material';
 import Navbar from '../../components/Navbar/Navbar';
+import StatusCard from '../../components/StatusCard/StatusCard';
+import LocationCard from '../../components/LocationCard/LocationCard';
 import Loading from '../../components/Loading/Loading';
+import { useAuth } from '../../context/AuthContext';
+import { useCollectionPoints } from '../../context/CollectionPointsContext';
+import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const auth = useAuth();
+  const collectionPoints = useCollectionPoints();
+  
+  const carregarUsuarios = () => {
+    const usuarios = localStorage.getItem('usuarios');
+    return usuarios ? JSON.parse(usuarios) : [];
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+    const loadDashboardData = async () => {
+      setIsLoading(true);
+      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setIsLoading(false);
+    };
 
-    return () => clearTimeout(timer);
+    loadDashboardData();
   }, []);
 
-  if (loading) {
+  const totalUsers = carregarUsuarios().length;
+  const totalCollectionPoints = collectionPoints.locaisColeta.length;
+
+  if (isLoading) {
     return (
-      <>
+      <div className="dashboard-page">
         <Navbar />
-        <Loading 
-          fullScreen 
-          withLogo 
-          text="Carregando Dashboard..." 
-          variant="pulse"
-        />
-      </>
+        <div className="dashboard">
+          <Loading />
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <div className="dashboard-page">
       <Navbar />
-      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" component="h1" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-            Dashboard - Recicla365
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
-          <Loading inline size="small" variant="dots" />
-          <Loading inline size="medium" variant="spinner" />
-          <Loading inline size="large" variant="pulse" color="success" />
-          <Loading inline variant="skeleton" />
-        </Box>
+      <div className="dashboard">
+        <div className="dashboard__header">
+          <h1 className="dashboard__title">Dashboard</h1>
+          <p className="dashboard__subtitle">
+            Visão geral dos locais de coleta de resíduos cadastrados
+          </p>
+        </div>
 
-        <Button 
-          onClick={() => setLoading(true)} 
-          variant="contained"
-          sx={{ backgroundColor: '#2e7d32' }}
-        >
-          Testar Loading Novamente
-        </Button>
-      </Container>
-    </Box>
+        <div className="dashboard__content">
+          <section className="dashboard__status-section">
+            <h2 className="dashboard__section-title">Status da Plataforma</h2>
+            <div className="dashboard__status-cards">
+              <StatusCard
+                title="Usuários Ativos"
+                value={totalUsers}
+                icon="👥"
+                color="blue"
+                description="Total de usuários cadastrados na plataforma"
+              />
+              <StatusCard
+                title="Locais de Coleta"
+                value={totalCollectionPoints}
+                icon="📍"
+                color="green"
+                description="Pontos de coleta registrados"
+              />
+            </div>
+          </section>
+
+          <section className="dashboard__locations-section">
+            <h2 className="dashboard__section-title">Locais de Coleta</h2>
+            <div className="dashboard__locations-list">
+              {collectionPoints.locaisColeta.length > 0 ? (
+                <>
+                  <div className="dashboard__locations-count">
+                    <p className="dashboard__count-text">
+                      Exibindo <strong>{collectionPoints.locaisColeta.length}</strong> {collectionPoints.locaisColeta.length === 1 ? 'local' : 'locais'} de coleta cadastrados
+                    </p>
+                  </div>
+                  {collectionPoints.locaisColeta.map((local) => (
+                    <LocationCard key={local.id} local={local} />
+                  ))}
+                </>
+              ) : (
+                <div className="dashboard__empty-state">
+                  <div className="dashboard__empty-icon">📍</div>
+                  <h3 className="dashboard__empty-title">Nenhum local cadastrado</h3>
+                  <p className="dashboard__empty-description">
+                    Ainda não há locais de coleta cadastrados na plataforma.
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
   );
 };
 
