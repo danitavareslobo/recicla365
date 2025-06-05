@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import Loading from '../../components/Loading/Loading';
 import FormField from '../../components/Form/FormField/FormField';
-import FormCheckboxGroup from '../../components/Form/FormCheckboxGroup/FormCheckboxGroup';
 import { useAuth } from '../../context/AuthContext';
 import type { LocalColeta, TipoResiduo } from '../../context/CollectionPointsContext';
 import './CadastroLocal.css';
@@ -11,7 +10,6 @@ const CadastroLocal: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { usuario } = useAuth();
 
-  // Estados do formulário
   const [formData, setFormData] = useState({
     nomeLocal: '',
     descricaoLocal: '',
@@ -25,22 +23,27 @@ const CadastroLocal: React.FC = () => {
       cidade: '',
       estado: ''
     },
-    tiposResiduos: [] as TipoResiduo[]
+    tiposResiduos: [] as TipoResiduo[],
+    coordenadas: {
+      latitude: '',
+      longitude: ''
+    }
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const tiposResiduosOptions = [
-    { value: 'Vidro', label: 'Vidro', icon: '🥃' },
-    { value: 'Metal', label: 'Metal', icon: '⚙️' },
-    { value: 'Papel', label: 'Papel', icon: '📄' },
-    { value: 'Plástico', label: 'Plástico', icon: '♻️' },
-    { value: 'Orgânico', label: 'Orgânico', icon: '🌱' },
-    { value: 'Baterias', label: 'Baterias', icon: '🔋' },
-    { value: 'Eletrônicos', label: 'Eletrônicos', icon: '💻' },
-    { value: 'Óleo', label: 'Óleo', icon: '🛢️' }
-  ] as const;
+    { value: 'Vidro', label: 'Vidro' },
+    { value: 'Metal', label: 'Metal' },
+    { value: 'Papel', label: 'Papel' },
+    { value: 'Plástico', label: 'Plástico' },
+    { value: 'Orgânico', label: 'Orgânico' },
+    { value: 'Baterias', label: 'Baterias' },
+    { value: 'Eletrônicos', label: 'Eletrônicos' },
+    { value: 'Óleo', label: 'Óleo' }
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -122,6 +125,81 @@ const CadastroLocal: React.FC = () => {
     }
   };
 
+  const handleCoordinatesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    const sanitizedValue = value.replace(/[^0-9.,-]/g, '');
+    
+    setFormData(prev => ({
+      ...prev,
+      coordenadas: {
+        ...prev.coordenadas,
+        [name]: sanitizedValue
+      }
+    }));
+
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocalização não é suportada neste navegador.');
+      return;
+    }
+
+    setIsLoadingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        setFormData(prev => ({
+          ...prev,
+          coordenadas: {
+            latitude: latitude.toFixed(6),
+            longitude: longitude.toFixed(6)
+          }
+        }));
+
+        const newErrors = { ...errors };
+        delete newErrors.latitude;
+        delete newErrors.longitude;
+        setErrors(newErrors);
+
+        setIsLoadingLocation(false);
+      },
+      (error) => {
+        console.error('Erro ao obter localização:', error);
+        let errorMessage = 'Erro ao obter localização atual.';
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Permissão de localização negada.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Localização não disponível.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Timeout ao obter localização.';
+            break;
+        }
+        
+        alert(errorMessage);
+        setIsLoadingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
   const handleTiposResiduosChange = (selectedValues: string[]) => {
     setFormData(prev => ({
       ...prev,
@@ -175,6 +253,25 @@ const CadastroLocal: React.FC = () => {
       newErrors.tiposResiduos = 'Selecione pelo menos um tipo de resíduo';
     }
 
+    if (formData.coordenadas.latitude && isNaN(Number(formData.coordenadas.latitude))) {
+      newErrors.latitude = 'Latitude deve ser um número válido';
+    }
+
+    if (formData.coordenadas.longitude && isNaN(Number(formData.coordenadas.longitude))) {
+      newErrors.longitude = 'Longitude deve ser um número válido';
+    }
+
+    const lat = Number(formData.coordenadas.latitude);
+    const lng = Number(formData.coordenadas.longitude);
+
+    if (formData.coordenadas.latitude && (lat < -90 || lat > 90)) {
+      newErrors.latitude = 'Latitude deve estar entre -90 e 90';
+    }
+
+    if (formData.coordenadas.longitude && (lng < -180 || lng > 180)) {
+      newErrors.longitude = 'Longitude deve estar entre -180 e 180';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -183,7 +280,7 @@ const CadastroLocal: React.FC = () => {
     <div className="cadastro-local-page">
       <Navbar />
       
-      {(isLoading || isLoadingAddress) && (
+      {(isLoading || isLoadingAddress || isLoadingLocation) && (
         <div className="cadastro-local__loading">
           <Loading />
         </div>
@@ -375,13 +472,49 @@ const CadastroLocal: React.FC = () => {
                 Selecione os tipos de materiais recicláveis que este local aceita:
               </p>
               
-              <FormCheckboxGroup
-                options={tiposResiduosOptions}
-                selectedValues={formData.tiposResiduos}
-                onChange={handleTiposResiduosChange}
-                name="tiposResiduos"
-                error={!!errors.tiposResiduos}
-              />
+              <div className="waste-types-grid">
+                {tiposResiduosOptions.map((tipo) => (
+                  <div key={tipo.value} className="waste-type-option">
+                    <label className="waste-type-label">
+                      <input
+                        type="checkbox"
+                        value={tipo.value}
+                        checked={formData.tiposResiduos.includes(tipo.value as TipoResiduo)}
+                        onChange={(e) => {
+                          const value = e.target.value as TipoResiduo;
+                          const isChecked = e.target.checked;
+                          
+                          setFormData(prev => ({
+                            ...prev,
+                            tiposResiduos: isChecked
+                              ? [...prev.tiposResiduos, value]
+                              : prev.tiposResiduos.filter(t => t !== value)
+                          }));
+                          
+                          if (isChecked && errors.tiposResiduos) {
+                            setErrors(prev => ({
+                              ...prev,
+                              tiposResiduos: ''
+                            }));
+                          }
+                        }}
+                        className="waste-type-checkbox"
+                      />
+                      <span className="waste-type-icon">
+                        {tipo.value === 'Vidro' && '🥃'}
+                        {tipo.value === 'Metal' && '⚙️'}
+                        {tipo.value === 'Papel' && '📄'}
+                        {tipo.value === 'Plástico' && '♻️'}
+                        {tipo.value === 'Orgânico' && '🌱'}
+                        {tipo.value === 'Baterias' && '🔋'}
+                        {tipo.value === 'Eletrônicos' && '💻'}
+                        {tipo.value === 'Óleo' && '🛢️'}
+                      </span>
+                      <span className="waste-type-text">{tipo.label}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
               
               {errors.tiposResiduos && (
                 <div className="error-message">{errors.tiposResiduos}</div>
@@ -396,8 +529,87 @@ const CadastroLocal: React.FC = () => {
               </div>
             </div>
 
+            <div className="form-section">
+              <h2 className="form-section__title">Coordenadas Geográficas</h2>
+              <p className="form-section__description">
+                Adicione as coordenadas para localização precisa no mapa (opcional):
+              </p>
+
+              <div className="coordinates-container">
+                <div className="coordinates-row">
+                  <div className="coordinate-field">
+                    <FormField
+                      label="Latitude"
+                      name="latitude"
+                      type="text"
+                      value={formData.coordenadas.latitude}
+                      onChange={handleCoordinatesChange}
+                      placeholder="-26.3045"
+                      error={!!errors.latitude}
+                    />
+                    {errors.latitude && (
+                      <div className="error-message">{errors.latitude}</div>
+                    )}
+                  </div>
+
+                  <div className="coordinate-field">
+                    <FormField
+                      label="Longitude"
+                      name="longitude"
+                      type="text"
+                      value={formData.coordenadas.longitude}
+                      onChange={handleCoordinatesChange}
+                      placeholder="-48.8487"
+                      error={!!errors.longitude}
+                    />
+                    {errors.longitude && (
+                      <div className="error-message">{errors.longitude}</div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="location-actions">
+                  <button
+                    type="button"
+                    onClick={handleGetCurrentLocation}
+                    disabled={isLoadingLocation}
+                    className="location-button"
+                  >
+                    {isLoadingLocation ? (
+                      <>⏳ Obtendo localização...</>
+                    ) : (
+                      <>📍 Usar minha localização atual</>
+                    )}
+                  </button>
+                  
+                  <div className="coordinates-info">
+                    <small className="form-hint">
+                      💡 Dica: Use o botão acima para obter automaticamente sua localização atual, 
+                      ou pesquise as coordenadas no Google Maps.
+                    </small>
+                  </div>
+                </div>
+
+                {(formData.coordenadas.latitude && formData.coordenadas.longitude) && (
+                  <div className="coordinates-preview">
+                    <p className="coordinates-display">
+                      🌐 Coordenadas: {formData.coordenadas.latitude}, {formData.coordenadas.longitude}
+                    </p>
+                    <a
+                      href={`https://www.google.com/maps?q=${formData.coordenadas.latitude},${formData.coordenadas.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="maps-link"
+                    >
+                      🗺️ Ver no Google Maps
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="cadastro-local__placeholder">
-              Seção de coordenadas geográficas será implementada na próxima etapa
+              Botões de ação (salvar/cancelar) serão implementados na próxima etapa
             </div>
           </form>
         </div>
